@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -21,8 +22,9 @@ public class ProductApi {
         if (!Objects.isNull(existing)) {
             throw new ApiException("Product with barcode '" + productPojo.getBarcode() + "' already exists.");
         }
-        productDao.persist(productPojo);
+        productDao.insert(productPojo);
     }
+
     public ProductPojo get(Integer id) throws ApiException {
         ProductPojo product = productDao.select(id);
         if (Objects.isNull(product)) {
@@ -30,15 +32,20 @@ public class ProductApi {
         }
         return product;
     }
+
     public List<ProductPojo> getAll(int page, int size) {
         return productDao.selectAll(page, size);
     }
 
     public List<ProductPojo> getByClientName(String clientName, int page, int size) throws ApiException {
-        if (Objects.isNull(clientName) || clientName.trim().isEmpty()) {
+        String normalizedClientName = clientName.trim().toLowerCase();
+        if (Objects.isNull(normalizedClientName) || normalizedClientName.isEmpty()) {
             throw new ApiException("Client name cannot be empty");
         }
-        return productDao.selectByClientName(clientName.trim(), page, size);
+        if (productDao.getTotalCountByClientName(normalizedClientName) == 0) {
+            return new ArrayList<>();
+        }
+        return productDao.selectByClientName(normalizedClientName, page, size);
     }
 
     public List<ProductPojo> getByPartialBarcode(String barcode, int page, int size) throws ApiException {
@@ -67,12 +74,10 @@ public class ProductApi {
     }
 
     public ProductPojo getByBarcode(String barcode) throws ApiException {
-        if (Objects.isNull(barcode) || barcode.trim().isEmpty()) {
-            throw new ApiException("Barcode cannot be empty");
-        }
-        ProductPojo product = productDao.select("barcode", barcode.trim().toLowerCase());
+        String normalizedBarcode = barcode.trim().toLowerCase();
+        ProductPojo product = productDao.select("barcode", normalizedBarcode);
         if (Objects.isNull(product)) {
-            throw new ApiException("Product not found for barcode: " + barcode);
+            throw new ApiException("Product not found for barcode: " + normalizedBarcode);
         }
         return product;
     }

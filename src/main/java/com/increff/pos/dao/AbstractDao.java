@@ -14,6 +14,7 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+
 @Transactional
 public abstract class AbstractDao<T extends AbstractVersionedPojo> {
 	@PersistenceContext

@@ -76,16 +76,26 @@ public class ProductTest {
     // Verify that the correct product data is returned when queried by barcode.
     @Test
     public void testGetProductByBarcode() throws ApiException {
+        // Create test data
         ProductPojo pojo = new ProductPojo();
         pojo.setBarcode(TEST_BARCODE);
         pojo.setClientId(TEST_CLIENT_ID);
         pojo.setName("Running Shoe");
         pojo.setMrp(1999.99);
 
+        ClientPojo client = new ClientPojo();
+        client.setId(TEST_CLIENT_ID);
+        client.setClientName(TEST_CLIENT);
+
+        // Set up mocks
         when(productApi.getByBarcode(TEST_BARCODE)).thenReturn(pojo);
         when(productApi.getByBarcode(TEST_BARCODE.toLowerCase())).thenReturn(pojo);
+        when(productFlow.getClientByIdOrThrow(TEST_CLIENT_ID)).thenReturn(client);
 
+        // Call the method
         ProductData data = productDto.getProductByBarcode(TEST_BARCODE);
+
+        // Verify the response
         assertNotNull(data);
         assertEquals(TEST_BARCODE, data.getBarcode());
         assertEquals("Running Shoe", data.getName());
@@ -119,11 +129,8 @@ public class ProductTest {
     // An exception is thrown if a client does not exist when attempting to fetch products by client name.
     @Test
     public void testGetProductsByClientName_throwsIfClientNotFound() throws ApiException {
-        ProductPojo product = new ProductPojo();
-        product.setClientId(TEST_CLIENT_ID);
-        when(productApi.getByClientName("Adidas", 0, 10)).thenReturn(Collections.singletonList(product));
-        when(productApi.getTotalCountByClientName("Adidas")).thenReturn(1L);
-        when(clientApi.getClientById(TEST_CLIENT_ID)).thenReturn(null);
+        when(productApi.getByClientName("Adidas", 0, 10)).thenThrow(new ApiException("Client with name Adidas does not exist."));
+        when(productApi.getTotalCountByClientName("Adidas")).thenReturn(0L);
 
         ApiException ex = assertThrows(ApiException.class, () ->
                 productDto.getProductsByClientName("Adidas", 0, 10)

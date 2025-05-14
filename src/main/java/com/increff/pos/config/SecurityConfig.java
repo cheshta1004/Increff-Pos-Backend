@@ -26,7 +26,8 @@ import org.springframework.http.HttpMethod;
         "com.increff.pos.pojo",
         "com.increff.pos.config",
         "com.increff.pos.client",
-        "com.increff.pos"
+        "com.increff.pos.scheduler",
+        "com.increff.pos",
 })
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 

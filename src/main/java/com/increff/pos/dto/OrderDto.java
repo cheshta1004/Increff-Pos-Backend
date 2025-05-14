@@ -10,31 +10,33 @@ import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.enums.OrderStatus;
 import com.increff.pos.model.form.BulkOrderItemForm;
 import com.increff.pos.model.form.OrderItemForm;
-import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.util.NormalizeUtil;
 import com.increff.pos.util.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
-@Service
+import java.util.Objects;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+@Component
 @Transactional
 public class OrderDto {
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Autowired
     private OrderApi orderApi;
 
     @Autowired
     private OrderFlow orderFlow;
+
 
     public BulkOrderItemData placeOrder(BulkOrderItemForm form) throws ApiException {
         ValidationUtil.validate(form);
@@ -60,22 +62,42 @@ public class OrderDto {
     }
 
     public PaginatedResponse<OrderData> getAllOrders(int page, int size) throws ApiException {
-        List<OrderPojo> orderPojoList = orderApi.getAllOrders();
-        List<OrderData> orderDataList = new ArrayList<>();
-        for (OrderPojo pojo : orderPojoList) {
-            List<OrderItemPojo> itemPojoList = orderApi.getOrderItems(pojo.getId());
-            orderDataList.add(orderFlow.convertOrderPojoToData(pojo, itemPojoList));
+        try {
+            List<OrderPojo> orderPojoList = orderApi.getAllOrders();
+            List<OrderData> orderDataList = new ArrayList<>();
+            for (OrderPojo pojo : orderPojoList) {
+                List<OrderItemPojo> itemPojoList = orderApi.getOrderItems(pojo.getId());
+                ProductPojo product = null;
+                if (!itemPojoList.isEmpty()) {
+                    product = orderFlow.getProductById(itemPojoList.get(0).getProductId());
+                }
+                orderDataList.add(DtoHelper.convertOrderPojoToData(pojo, itemPojoList, product));
+            }
+            
+            // Sort orders by time in descending order
+            orderDataList.sort((o1, o2) -> {
+                try {
+                    ZonedDateTime time1 = ZonedDateTime.parse(o1.getTime(), DATE_FORMATTER);
+                    ZonedDateTime time2 = ZonedDateTime.parse(o2.getTime(), DATE_FORMATTER);
+                    return time2.compareTo(time1); // Descending order
+                } catch (DateTimeParseException e) {
+                    // If parsing fails, fall back to string comparison
+                    return o2.getTime().compareTo(o1.getTime());
+                }
+            });
+
+            int startIndex = page * size;
+            int endIndex = Math.min(startIndex + size, orderDataList.size());
+            if (startIndex >= orderDataList.size()) {
+                startIndex = 0;
+                endIndex = Math.min(size, orderDataList.size());
+            }
+            List<OrderData> paginatedContent = orderDataList.subList(startIndex, endIndex);
+            int totalPages = (int) Math.ceil((double) orderDataList.size() / size);
+            return new PaginatedResponse<>(paginatedContent, page, totalPages, orderDataList.size(), size);
+        } catch (Exception e) {
+            throw new ApiException("Error getting orders: " + e.getMessage());
         }
-        orderDataList.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, orderDataList.size());
-        if (startIndex >= orderDataList.size()) {
-            startIndex = 0;
-            endIndex = Math.min(size, orderDataList.size());
-        }
-        List<OrderData> paginatedContent = orderDataList.subList(startIndex, endIndex);
-        int totalPages = (int) Math.ceil((double) orderDataList.size() / size);
-        return new PaginatedResponse<>(paginatedContent, page, totalPages, orderDataList.size(), size);
     }
 
     public List<OrderItemData> getOrderItems(Integer orderId) {
@@ -96,40 +118,13 @@ public class OrderDto {
         if (Objects.isNull(statusStr) || statusStr.trim().isEmpty()) {
             throw new ApiException("Order status must not be empty");
         }
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(statusStr.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ApiException("Invalid order status: " + statusStr + ". Valid statuses are: CREATED, COMPLETED.");
+        OrderStatus status = parseOrderStatus(statusStr);
+        if (status == OrderStatus.CANCELLED) {
+            cancelOrderItems(orderId);
         }
-        OrderPojo order = orderApi.getOrderById(orderId);
-        if (Objects.isNull(order)) {
-            throw new ApiException("Order not found for ID: " + orderId);
-        }
-        orderApi.updateStatus(orderId,status);
+        orderApi.updateStatus(orderId, status);
     }
 
-    public List<OrderData> getOrdersByStatus(String statusStr) throws ApiException {
-        if (Objects.isNull(statusStr) || statusStr.trim().isEmpty()) {
-            throw new ApiException("Order status must not be empty");
-        }
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(statusStr.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ApiException("Invalid order status: " + statusStr + ". Valid statuses are: CREATED, COMPLETED.");
-        }
-        List<OrderPojo> pojoList = orderApi.getOrdersByStatus(status);
-        List<OrderData> dataList = new ArrayList<>();
-        for (OrderPojo pojo : pojoList) {
-            List<OrderItemPojo> itemPojoList = orderApi.getOrderItems(pojo.getId());
-            for (OrderItemPojo orderItem : itemPojoList) {
-                ProductPojo product = orderFlow.getProductById(orderItem.getProductId());
-                dataList.add(DtoHelper.convertOrderPojoToData(pojo, itemPojoList, product));
-            }
-        }
-        return dataList;
-    }
 
     public OrderData getOrderById(Integer orderId) throws ApiException {
         OrderPojo pojo = orderApi.getOrderById(orderId);
@@ -137,15 +132,12 @@ public class OrderDto {
             throw new ApiException("Order not found for ID: " + orderId);
         }
         List<OrderItemPojo> itemPojoList = orderApi.getOrderItems(pojo.getId());
-        return orderFlow.convertOrderPojoToData(pojo, itemPojoList);
+        ProductPojo product = itemPojoList.isEmpty() ? null : orderFlow.getProductById(itemPojoList.get(0).getProductId());
+        return DtoHelper.convertOrderPojoToData(pojo, itemPojoList, product);
     }
 
-    private OrderPojo createNewOrder(BulkOrderItemForm form) {
-        OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now());
-        order.setCustomerName(form.getCustomerName());
-        order.setCustomerContact(form.getCustomerContact());
-        return order;
+    private OrderPojo createNewOrder(BulkOrderItemForm form) throws ApiException {
+        return DtoHelper.convertBulkOrderFormToPojo(form);
     }
 
     private void placeOrderItem(OrderItemForm itemForm, Integer orderId, BulkOrderItemData result) throws ApiException {
@@ -154,26 +146,18 @@ public class OrderDto {
             NormalizeUtil.normalize(itemForm);
             String barcode = itemForm.getBarcode().trim().toLowerCase();
             ProductPojo product = orderFlow.getProductByBarcode(barcode);
-            if (Objects.isNull(product)) {
-                throw new ApiException("Product not found for barcode: " + barcode);
-            }
             orderFlow.reduceInventory(product.getId(), itemForm.getQuantity());
-
-            OrderItemPojo itemPojo = new OrderItemPojo();
-            itemPojo.setOrderId(orderId);
-            itemPojo.setProductId(product.getId());
-            itemPojo.setQuantity(itemForm.getQuantity());
-            itemPojo.setSellingPrice(itemForm.getSellingPrice());
+            OrderItemPojo itemPojo = DtoHelper.convertOrderItemFormToPojo(itemForm, orderId, product.getId());
             orderApi.insertOrder(itemPojo);
 
             result.addSuccess(itemForm, "Order item placed successfully.");
         } catch (ApiException e) {
-            result.addFailure(itemForm, "Failed to place order item: " + e.getMessage());
-            throw new ApiException("Failed to place order item: " + e.getMessage());
+            result.addFailure(itemForm, e.getMessage());
+            throw e;
         }
     }
 
-    private OrderPojo createAndInsertOrder(BulkOrderItemForm form, BulkOrderItemData result) {
+    private OrderPojo createAndInsertOrder(BulkOrderItemForm form, BulkOrderItemData result) throws ApiException {
         OrderPojo order = createNewOrder(form);
         orderApi.insertOrder(order);
         result.setOrderId(order.getId());
@@ -182,23 +166,33 @@ public class OrderDto {
 
     private void checkInventory(List<OrderItemForm> orderItems, BulkOrderItemData result) throws ApiException {
         for (OrderItemForm itemForm : orderItems) {
-            ValidationUtil.validate(itemForm);
-            NormalizeUtil.normalize(itemForm);
-            String barcode = itemForm.getBarcode().trim().toLowerCase();
-            ProductPojo product = orderFlow.getProductByBarcode(barcode);
-            if (Objects.isNull(product)) {
-                result.addFailure(itemForm, "Product not found for barcode: " + barcode);
-                continue;
-            }
-            InventoryPojo inventory = orderFlow.getInventoryByProductId(product.getId());
-            if (Objects.isNull(inventory)) {
-                result.addFailure(itemForm, "No inventory found for product: " + product.getName());
-                continue;
-            }
-            if (inventory.getQuantity() < itemForm.getQuantity()) {
-                result.addFailure(itemForm, "Insufficient inventory for product: " + product.getName());
+            try {
+                ValidationUtil.validate(itemForm);
+                NormalizeUtil.normalize(itemForm);
+                orderFlow.validateInventory(itemForm.getBarcode(), itemForm.getQuantity());
+            } catch (ApiException e) {
+                result.addFailure(itemForm, e.getMessage());
             }
         }
     }
+    private OrderStatus parseOrderStatus(String statusStr) throws ApiException {
+        try {
+            return OrderStatus.valueOf(statusStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ApiException("Invalid order status: " + statusStr + ". Valid statuses are: CREATED, COMPLETED, CANCELLED.");
+        }
+    }
+    
+    private void cancelOrderItems(Integer orderId) throws ApiException {
+        List<OrderItemPojo> orderItems = orderApi.getOrderItems(orderId);
+        for (OrderItemPojo item : orderItems) {
+            orderFlow.restoreInventory(item.getProductId(), item.getQuantity());
+        }
+        OrderPojo order = orderApi.getOrderById(orderId);
+        if (!Objects.isNull(order)) {
+            orderFlow.recalculateDailyReport(order.getTime());
+        }
+    }
+    
 
 }

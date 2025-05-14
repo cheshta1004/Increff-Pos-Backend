@@ -3,16 +3,16 @@ package com.increff.pos.model.form;
 import lombok.Getter;
 import lombok.Setter;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
 public class SalesReportFilterForm {
     @NotNull(message = "Start date is required")
-    private LocalDate startDate;
+    private ZonedDateTime startDate;
     
     @NotNull(message = "End date is required")
-    private LocalDate endDate;
+    private ZonedDateTime endDate;
     
     private String clientName;
 } 

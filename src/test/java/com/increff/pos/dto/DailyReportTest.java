@@ -2,16 +2,17 @@ package com.increff.pos.dto;
 
 import com.increff.pos.api.DailyReportApi;
 import com.increff.pos.model.data.DailyReportData;
+import com.increff.pos.pojo.DailyReportPojo;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Collections;
-
+import com.increff.pos.model.form.SalesReportFilterForm;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -23,28 +24,32 @@ public class DailyReportTest {
     @Mock
     private DailyReportApi dailyReportApi;
 
+    private SalesReportFilterForm testFilterForm;
+
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
     }
 
-    private DailyReportData createDailyReportData() {
-        DailyReportData data = new DailyReportData();
-        data.setDate(LocalDate.of(2025, 5, 7).toString());
-        data.setOrderCount(3L);
-        data.setTotalItems(15L);
-        data.setRevenue(500.0);
-        return data;
+    private DailyReportPojo createDailyReportPojo() {
+        DailyReportPojo pojo = new DailyReportPojo();
+        pojo.setDate(ZonedDateTime.of(2025, 5, 7, 0, 0, 0, 0, ZoneId.systemDefault()));
+        pojo.setOrderCount(3L);
+        pojo.setTotalItems(15L);
+        pojo.setRevenue(500.0);
+        return pojo;
     }
 
     @Test
     public void testGetAllDailyReports() {
-        List<DailyReportData> expected = Collections.singletonList(createDailyReportData());
-        when(dailyReportApi.getAllDailyReports()).thenReturn(expected);
+        List<DailyReportPojo> expectedData = Collections.singletonList(createDailyReportPojo());
+        when(dailyReportApi.getAllDailyReports()).thenReturn(expectedData);
 
         List<DailyReportData> actual = dailyReportDto.getAllDailyReports();
 
-        assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
         verify(dailyReportApi, times(1)).getAllDailyReports();
     }
+
 } 

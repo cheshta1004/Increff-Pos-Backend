@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/product")
@@ -53,15 +52,7 @@ public class ProductController {
             @RequestParam(required = false) String barcode,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiException {
-        if (!Objects.isNull(searchTerm)) {
-            return productDto.searchProducts(searchTerm, page, size);
-        } else if (!Objects.isNull(clientName)) {
-            return productDto.getProductsByClientName(clientName, page, size);
-        } else if (!Objects.isNull(barcode)) {
-            return productDto.getProductsByPartialBarcode(barcode, page, size);
-        } else {
-            return productDto.getAllProducts(page, size);
-        }
+        return productDto.searchProducts(searchTerm, clientName, barcode, page, size);
     }
     @RequestMapping(path = "/update/{barcode}", method = RequestMethod.PUT)
     public void updateProductByBarcode(@PathVariable String barcode, @RequestBody ProductForm form) throws ApiException {

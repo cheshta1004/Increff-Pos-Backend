@@ -8,19 +8,20 @@ import com.increff.pos.model.enums.Role;
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.model.form.SignupForm;
 import com.increff.pos.pojo.UserPojo;
+import com.increff.pos.util.JwtUtil;
 import com.increff.pos.util.NormalizeUtil;
 import com.increff.pos.util.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class UserDto {
     @Autowired
     private RoleConfig roleConfig;
     @Autowired
-    public UserApi userApi;
+    private UserApi userApi;
 
-    public String signup(SignupForm form) throws ApiException{
+    public String signup(SignupForm form) throws ApiException {
         ValidationUtil.validate(form);
         NormalizeUtil.normalize(form);
         Role role = roleConfig.isSupervisor(form.getEmail()) ? Role.SUPERVISOR : Role.OPERATOR;
@@ -28,12 +29,14 @@ public class UserDto {
         return userApi.signup(pojo);
     }
 
-
     public LoginData login(LoginForm form) throws ApiException {
         ValidationUtil.validate(form);
         NormalizeUtil.normalize(form);
         UserPojo pojo = DtoHelper.convertLoginFormToPojo(form);
-        return userApi.login(pojo);
+        UserPojo user = userApi.login(pojo);
+        JwtUtil jwtUtil = new JwtUtil();
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        return DtoHelper.convertUserPojoToLoginData(user, token);
     }
 }
 

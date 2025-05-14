@@ -40,11 +40,6 @@ public class OrderController {
         return orderDto.getOrderItems(orderId);
     }
 
-    @RequestMapping(value = "/status/{status}", method = RequestMethod.GET)
-    public List<OrderData> getByStatus(@PathVariable String status) throws ApiException {
-        return orderDto.getOrdersByStatus(status);
-    }
-
     @RequestMapping(value = "/update-status/{orderId}/{status}", method = RequestMethod.PUT)
     public void updateStatus(@PathVariable Integer orderId, @PathVariable String status) throws ApiException {
         orderDto.updateStatus(orderId, status);

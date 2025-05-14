@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,11 +20,11 @@ public class UserController {
     private UserDto userDto;
 
     @RequestMapping(path = "/signup", method = RequestMethod.POST)
-    public String signup(@RequestBody @Valid SignupForm form) throws ApiException{
+    public String signup(@RequestBody SignupForm form) throws ApiException{
         return userDto.signup(form);
     }
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public LoginData login(@RequestBody @Valid LoginForm form, HttpServletRequest request) throws ApiException {
+    public LoginData login(@RequestBody LoginForm form, HttpServletRequest request) throws ApiException {
       return userDto.login(form);
     }
 

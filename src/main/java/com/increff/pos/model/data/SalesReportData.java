@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RevenueData {
+public class SalesReportData {
     private String clientName;
     private String productName;
     private String barcode;

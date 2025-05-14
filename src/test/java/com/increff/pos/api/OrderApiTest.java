@@ -15,6 +15,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.annotation.DirtiesContext;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -37,6 +39,9 @@ public class OrderApiTest {
     @Autowired
     private ClientApi clientApi;
 
+    @PersistenceContext
+    private EntityManager em;
+
     private ProductPojo testProduct1;
     private ProductPojo testProduct2;
     private ClientPojo testClient;
@@ -44,12 +49,18 @@ public class OrderApiTest {
 
     @Before
     public void setup() throws ApiException {
-        // Create a test client first
+        // Clear the database
+        em.createQuery("DELETE FROM OrderItemPojo").executeUpdate();
+        em.createQuery("DELETE FROM OrderPojo").executeUpdate();
+        em.createQuery("DELETE FROM ProductPojo").executeUpdate();
+        em.createQuery("DELETE FROM ClientPojo").executeUpdate();
+        em.flush();
+
+        // Create a test client
         ClientPojo client = new ClientPojo();
         client.setClientName("testclient");
         clientApi.insertClient(client);
-        List<ClientPojo> clients = clientApi.getClientsByPartialName("testclient", 0, 1);
-        testClient = clients.get(0);
+        testClient = clientApi.getClientsByPartialName("testclient", 0, 1).get(0);
 
         // Create test products
         ProductPojo product1 = new ProductPojo();
@@ -71,62 +82,82 @@ public class OrderApiTest {
         testProduct2 = productApi.getByBarcode("789012");
 
         // Create a test order
-        OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now());
-        order.setStatus(OrderStatus.CREATED);
-        order.setCustomerName("Test Customer");
-        order.setCustomerContact("1234567890");
-        orderApi.insertOrder(order);
-        testOrder = orderApi.getAllOrders().get(0);
+        testOrder = new OrderPojo();
+        testOrder.setTime(ZonedDateTime.now());
+        testOrder.setStatus(OrderStatus.CREATED);
+        testOrder.setCustomerName("Test Customer");
+        testOrder.setCustomerContact("1234567890");
+        orderApi.insertOrder(testOrder);
     }
 
     private OrderItemPojo createOrderItem(Integer productId, Integer quantity, Double sellingPrice) {
-        OrderItemPojo orderItem = new OrderItemPojo();
-        orderItem.setOrderId(testOrder.getId());
-        orderItem.setProductId(productId);
-        orderItem.setQuantity(quantity);
-        orderItem.setSellingPrice(sellingPrice);
-        return orderItem;
+        OrderItemPojo item = new OrderItemPojo();
+        item.setOrderId(testOrder.getId());
+        item.setProductId(productId);
+        item.setQuantity(quantity);
+        item.setSellingPrice(sellingPrice);
+        return item;
     }
 
-    // Test to verify a new order is inserted successfully and can be retrieved
     @Test
-    public void testInsertOrder_success() {
+    public void testInsertOrder_success() throws ApiException {
         OrderPojo order = new OrderPojo();
         order.setTime(ZonedDateTime.now());
         order.setStatus(OrderStatus.CREATED);
         order.setCustomerName("New Customer");
         order.setCustomerContact("9876543210");
-        
         orderApi.insertOrder(order);
-        
-        List<OrderPojo> allOrders = orderApi.getAllOrders();
-        assertEquals(2, allOrders.size());
-        assertEquals("New Customer", allOrders.get(1).getCustomerName());
+
+        OrderPojo retrieved = orderApi.getOrderById(order.getId());
+        assertNotNull(retrieved);
+        assertEquals(OrderStatus.CREATED, retrieved.getStatus());
+        assertEquals("New Customer", retrieved.getCustomerName());
+        assertEquals("9876543210", retrieved.getCustomerContact());
     }
 
-    // Test to ensure an order item is added correctly to an order
     @Test
     public void testInsertOrderItem_success() {
-        OrderItemPojo orderItem = createOrderItem(testProduct1.getId(), 2, 99.99);
-        orderApi.insertOrder(orderItem);
-        
-        List<OrderItemPojo> orderItems = orderApi.getOrderItems(testOrder.getId());
-        assertEquals(1, orderItems.size());
-        assertEquals(Integer.valueOf(2), orderItems.get(0).getQuantity());
-        assertEquals(Double.valueOf(99.99), orderItems.get(0).getSellingPrice());
+        OrderItemPojo item = createOrderItem(testProduct1.getId(), 2, 99.99);
+        orderApi.insertOrder(item);
+
+        List<OrderItemPojo> items = orderApi.getOrderItems(testOrder.getId());
+        assertEquals(1, items.size());
+        assertEquals(testProduct1.getId(), items.get(0).getProductId());
+        assertEquals(Integer.valueOf(2), items.get(0).getQuantity());
+        assertEquals(Double.valueOf(99.99), items.get(0).getSellingPrice());
     }
 
-    // Test to verify that the order status can be updated successfully
     @Test
-    public void testUpdateStatus_success() {
+    public void testUpdateStatus_success() throws ApiException {
         orderApi.updateStatus(testOrder.getId(), OrderStatus.COMPLETED);
-        
+
         OrderPojo updatedOrder = orderApi.getOrderById(testOrder.getId());
         assertEquals(OrderStatus.COMPLETED, updatedOrder.getStatus());
     }
 
-    // Test to ensure all orders can be fetched successfully
+    @Test(expected = ApiException.class)
+    public void testUpdateStatus_notFound_shouldThrow() throws ApiException {
+        orderApi.updateStatus(999, OrderStatus.COMPLETED);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateStatus_completedOrder_shouldThrow() throws ApiException {
+        // First complete the order
+        orderApi.updateStatus(testOrder.getId(), OrderStatus.COMPLETED);
+        
+        // Try to update status again
+        orderApi.updateStatus(testOrder.getId(), OrderStatus.CREATED);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateStatus_cancelledOrder_shouldThrow() throws ApiException {
+        // First cancel the order
+        orderApi.updateStatus(testOrder.getId(), OrderStatus.CANCELLED);
+        
+        // Try to update status again
+        orderApi.updateStatus(testOrder.getId(), OrderStatus.CREATED);
+    }
+
     @Test
     public void testGetAllOrders_success() {
         OrderPojo order = new OrderPojo();
@@ -135,24 +166,22 @@ public class OrderApiTest {
         order.setCustomerName("Another Customer");
         order.setCustomerContact("5555555555");
         orderApi.insertOrder(order);
-        
+
         List<OrderPojo> allOrders = orderApi.getAllOrders();
         assertEquals(2, allOrders.size());
     }
 
-    // Test to verify that multiple order items can be retrieved for a single order
     @Test
     public void testGetOrderItems_success() {
         OrderItemPojo item1 = createOrderItem(testProduct1.getId(), 2, 99.99);
         OrderItemPojo item2 = createOrderItem(testProduct2.getId(), 1, 149.99);
         orderApi.insertOrder(item1);
         orderApi.insertOrder(item2);
-        
+
         List<OrderItemPojo> orderItems = orderApi.getOrderItems(testOrder.getId());
         assertEquals(2, orderItems.size());
     }
 
-    // Test to ensure orders can be fetched based on their status
     @Test
     public void testGetOrdersByStatus_success() {
         OrderPojo order = new OrderPojo();
@@ -161,20 +190,38 @@ public class OrderApiTest {
         order.setCustomerName("Another Customer");
         order.setCustomerContact("5555555555");
         orderApi.insertOrder(order);
-        
+
         List<OrderPojo> createdOrders = orderApi.getOrdersByStatus(OrderStatus.CREATED);
         assertEquals(1, createdOrders.size());
-        
+
         List<OrderPojo> completedOrders = orderApi.getOrdersByStatus(OrderStatus.COMPLETED);
         assertEquals(1, completedOrders.size());
     }
 
-    // Test to verify that an order can be retrieved successfully by its ID
     @Test
-    public void testGetOrderById_success() {
-        OrderPojo retrievedOrder = orderApi.getOrderById(testOrder.getId());
-        assertNotNull(retrievedOrder);
-        assertEquals(testOrder.getCustomerName(), retrievedOrder.getCustomerName());
-        assertEquals(testOrder.getCustomerContact(), retrievedOrder.getCustomerContact());
+    public void testGetOrderById_success() throws ApiException {
+        OrderPojo retrieved = orderApi.getOrderById(testOrder.getId());
+        assertNotNull(retrieved);
+        assertEquals(testOrder.getId(), retrieved.getId());
+        assertEquals(testOrder.getCustomerName(), retrieved.getCustomerName());
+        assertEquals(testOrder.getCustomerContact(), retrieved.getCustomerContact());
+        assertEquals(testOrder.getStatus(), retrieved.getStatus());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testGetOrderById_notFound() throws ApiException {
+        orderApi.getOrderById(999);
+    }
+
+    @Test
+    public void testGetOrderItems_empty() {
+        List<OrderItemPojo> items = orderApi.getOrderItems(testOrder.getId());
+        assertTrue(items.isEmpty());
+    }
+
+    @Test
+    public void testGetOrdersByStatus_empty() {
+        List<OrderPojo> cancelledOrders = orderApi.getOrdersByStatus(OrderStatus.CANCELLED);
+        assertTrue(cancelledOrders.isEmpty());
     }
 } 

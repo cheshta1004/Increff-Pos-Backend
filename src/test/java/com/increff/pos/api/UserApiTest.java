@@ -1,13 +1,15 @@
 package com.increff.pos.api;
 
+import com.increff.pos.dao.UserDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.LoginData;
 import com.increff.pos.pojo.UserPojo;
 import com.increff.pos.model.enums.Role;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
@@ -23,13 +26,19 @@ import static org.junit.Assert.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserApiTest {
 
-    @Autowired
+    @InjectMocks
     private UserApi userApi;
+
+    @Mock
+    private UserDao userDao;
 
     private UserPojo testUser;
 
     @Before
     public void setup() {
+        MockitoAnnotations.openMocks(this);
+
+        // Setup test data
         testUser = new UserPojo();
         testUser.setEmail("test@example.com");
         testUser.setPassword("password123");
@@ -37,72 +46,82 @@ public class UserApiTest {
         testUser.setRole(Role.SUPERVISOR);
     }
 
-    // Test to verify that a new user can successfully sign up and their details are correctly saved and retrieved
     @Test
-    public void testSignup_success() {
+    public void testSignup_Success() {
+        when(userDao.emailExists(testUser.getEmail())).thenReturn(false);
+        doNothing().when(userDao).insert(testUser);
+
         String result = userApi.signup(testUser);
+
         assertEquals("Signup successful!", result);
-        
-        UserPojo retrievedUser = userApi.getByEmail(testUser.getEmail());
-        assertNotNull(retrievedUser);
-        assertEquals(testUser.getEmail(), retrievedUser.getEmail());
-        assertEquals(testUser.getName(), retrievedUser.getName());
-        assertEquals(testUser.getRole(), retrievedUser.getRole());
+        verify(userDao, times(1)).emailExists(testUser.getEmail());
+        verify(userDao, times(1)).insert(testUser);
     }
 
-    // Test to verify that attempting to sign up with an already existing email returns an error
     @Test
-    public void testSignup_duplicateEmail() {
-        userApi.signup(testUser);
+    public void testSignup_DuplicateEmail() {
+        when(userDao.emailExists(testUser.getEmail())).thenReturn(true);
 
         String result = userApi.signup(testUser);
+
         assertEquals("Email already exists!", result);
+        verify(userDao, times(1)).emailExists(testUser.getEmail());
+        verify(userDao, never()).insert(any(UserPojo.class));
     }
 
-    // Test to verify that a user can log in successfully after signup and receives the correct login details and token
     @Test
-    public void testLogin_success() throws ApiException {
-        userApi.signup(testUser);
-        LoginData loginData = userApi.login(testUser);
-        
-        assertNotNull(loginData);
-        assertEquals(testUser.getEmail(), loginData.getEmail());
-        assertEquals(testUser.getName(), loginData.getName());
-        assertEquals(testUser.getRole(), loginData.getRole());
-        assertNotNull(loginData.getToken());
+    public void testLogin_Success() throws ApiException {
+        when(userDao.getByEmail(testUser.getEmail())).thenReturn(testUser);
+
+        UserPojo result = userApi.login(testUser);
+
+        assertNotNull(result);
+        assertEquals(testUser.getEmail(), result.getEmail());
+        assertEquals(testUser.getPassword(), result.getPassword());
+        assertEquals(testUser.getName(), result.getName());
+        assertEquals(testUser.getRole(), result.getRole());
+        verify(userDao, times(1)).getByEmail(testUser.getEmail());
     }
 
-    // Test to verify that logging in with incorrect credentials throws an ApiException
     @Test(expected = ApiException.class)
-    public void testLogin_invalidCredentials() throws ApiException {
-        userApi.signup(testUser);
-        UserPojo wrongUser = new UserPojo();
-        wrongUser.setEmail(testUser.getEmail());
-        wrongUser.setPassword("wrongpassword");
-        
-        userApi.login(wrongUser);
+    public void testLogin_InvalidPassword() throws ApiException {
+        UserPojo wrongPasswordUser = new UserPojo();
+        wrongPasswordUser.setEmail(testUser.getEmail());
+        wrongPasswordUser.setPassword("wrongpassword");
+
+        when(userDao.getByEmail(testUser.getEmail())).thenReturn(testUser);
+
+        userApi.login(wrongPasswordUser);
     }
-    // Test to verify that logging in with a non-existent user throws an ApiException
+
     @Test(expected = ApiException.class)
-    public void testLogin_nonexistentUser() throws ApiException {
+    public void testLogin_UserNotFound() throws ApiException {
+        when(userDao.getByEmail(testUser.getEmail())).thenReturn(null);
+
         userApi.login(testUser);
     }
 
-    // Test to verify that a user can be retrieved by email after signup
     @Test
-    public void testGetByEmail_success() {
-        userApi.signup(testUser);
-        UserPojo retrievedUser = userApi.getByEmail(testUser.getEmail());
-        
-        assertNotNull(retrievedUser);
-        assertEquals(testUser.getEmail(), retrievedUser.getEmail());
-        assertEquals(testUser.getName(), retrievedUser.getName());
-        assertEquals(testUser.getRole(), retrievedUser.getRole());
+    public void testGetByEmail_Success() {
+        when(userDao.getByEmail(testUser.getEmail())).thenReturn(testUser);
+
+        UserPojo result = userApi.getByEmail(testUser.getEmail());
+
+        assertNotNull(result);
+        assertEquals(testUser.getEmail(), result.getEmail());
+        assertEquals(testUser.getPassword(), result.getPassword());
+        assertEquals(testUser.getName(), result.getName());
+        assertEquals(testUser.getRole(), result.getRole());
+        verify(userDao, times(1)).getByEmail(testUser.getEmail());
     }
-    // Test to verify that querying with a non-existent email returns null
+
     @Test
-    public void testGetByEmail_nonexistentUser() {
-        UserPojo retrievedUser = userApi.getByEmail("nonexistent@example.com");
-        assertNull(retrievedUser);
+    public void testGetByEmail_NotFound() {
+        when(userDao.getByEmail(testUser.getEmail())).thenReturn(null);
+
+        UserPojo result = userApi.getByEmail(testUser.getEmail());
+
+        assertNull(result);
+        verify(userDao, times(1)).getByEmail(testUser.getEmail());
     }
 } 

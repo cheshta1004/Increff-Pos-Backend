@@ -1,49 +1,27 @@
 package com.increff.pos.dto;
 
-import com.increff.pos.api.ClientApi;
 import com.increff.pos.api.InventoryApi;
 import com.increff.pos.api.ProductApi;
-import com.increff.pos.dto.DtoHelper;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.flow.InventoryFlow;
 import com.increff.pos.model.data.BulkInventoryData;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.OperationResponse;
 import com.increff.pos.model.form.InventoryForm;
-import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.flow.InventoryFlow;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.annotation.DirtiesContext;
 import org.mockito.InjectMocks;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-@WebAppConfiguration
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@RunWith(MockitoJUnitRunner.class)
 public class InventoryTest {
 
     @InjectMocks
@@ -53,123 +31,193 @@ public class InventoryTest {
     private InventoryApi inventoryApi;
 
     @Mock
-    private InventoryFlow inventoryFlow;
-
-    @Mock
     private ProductApi productApi;
 
     @Mock
-    private ClientApi clientApi;
+    private InventoryFlow inventoryFlow;
 
-    private static final String TEST_BARCODE = "TEST123";
-    private static final String TEST_CLIENT = "Nike";
-    private static final Integer TEST_CLIENT_ID = 1;
-    private static final Integer TEST_PRODUCT_ID = 1;
+    private ProductPojo product;
+    private InventoryPojo inventory;
+    private InventoryForm form;
 
-    // Mocks dependencies and sets up test data for consistent behavior across inventory-related unit tests.
     @Before
-    public void init() throws ApiException {
-        MockitoAnnotations.openMocks(this);
-        ClientPojo client = new ClientPojo();
-        client.setId(TEST_CLIENT_ID);
-        client.setClientName(TEST_CLIENT);
-        when(clientApi.getClientById(TEST_CLIENT_ID)).thenReturn(client);
-        ProductPojo product = createProductPojo();
-        when(productApi.getByBarcode(TEST_BARCODE)).thenReturn(product);
-        when(productApi.getByBarcode(TEST_BARCODE.toLowerCase())).thenReturn(product);
-        when(inventoryFlow.getProductByBarcode(TEST_BARCODE)).thenReturn(product);
-        when(inventoryFlow.getProductIdFromForm(argThat(form -> form.getProductBarcode().equals(TEST_BARCODE))))
-            .thenReturn(TEST_PRODUCT_ID);
-        InventoryPojo inventory = createInventoryPojo();
-        when(inventoryApi.getByProductId(TEST_PRODUCT_ID)).thenReturn(inventory);
-    }
-
-    private ProductPojo createProductPojo() {
-        ProductPojo product = new ProductPojo();
-        product.setId(TEST_PRODUCT_ID);
-        product.setBarcode(TEST_BARCODE);
+    public void setUp() {
+        // Setup test product
+        product = new ProductPojo();
+        product.setId(1);
+        product.setBarcode("test123");
         product.setName("Test Product");
         product.setMrp(100.0);
-        product.setClientId(TEST_CLIENT_ID);
-        return product;
+        product.setClientId(1);
+
+        // Setup test inventory
+        inventory = new InventoryPojo();
+        inventory.setId(1);
+        inventory.setProductId(product.getId());
+        inventory.setQuantity(10);
+
+        // Setup test form
+        form = new InventoryForm();
+        form.setProductBarcode("test123");
+        form.setQuantity(10);
     }
 
-    private InventoryForm createInventoryForm(String barcode, Integer quantity) {
-        InventoryForm form = new InventoryForm();
-        form.setProductBarcode(barcode);
-        form.setQuantity(quantity);
-        return form;
-    }
-
-    private InventoryPojo createInventoryPojo() {
-        InventoryPojo pojo = new InventoryPojo();
-        pojo.setId(1);
-        pojo.setProductId(TEST_PRODUCT_ID);
-        pojo.setQuantity(10);
-        return pojo;
-    }
-
-    // Test to verify that the addInventory method is called with the correct InventoryPojo when a valid InventoryForm is provided.
     @Test
     public void testAddInventory() throws ApiException {
-        InventoryForm form = createInventoryForm(TEST_BARCODE, 10);
-        doNothing().when(inventoryApi).addInventory(any(InventoryPojo.class));
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(null);
+
         inventoryDto.addInventory(form);
+
         verify(inventoryApi).addInventory(any(InventoryPojo.class));
     }
 
-    // verify that a new inventory record is added when no existing inventory record is found for the given barcode.
+    @Test(expected = ApiException.class)
+    public void testAddInventory_InvalidForm() throws ApiException {
+        form.setQuantity(-1); // Invalid quantity
+        inventoryDto.addInventory(form);
+    }
+
     @Test
-    public void testUpdateInventory_NewRecord() throws ApiException {
-        InventoryForm form = createInventoryForm(TEST_BARCODE, 15);
-        when(inventoryApi.getByProductId(TEST_PRODUCT_ID)).thenReturn(null);
-        doNothing().when(inventoryApi).addInventory(any(InventoryPojo.class));
-        
-        inventoryDto.updateInventory(TEST_BARCODE, form);
+    public void testAddInventoryFromList() throws ApiException {
+        List<InventoryForm> formList = new ArrayList<>();
+        formList.add(form);
+
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(null);
+
+        BulkInventoryData result = inventoryDto.addInventoryFromList(formList);
+
+        assertNotNull(result);
+        assertEquals(1, result.getSuccessList().size());
+        assertEquals(0, result.getFailureList().size());
         verify(inventoryApi).addInventory(any(InventoryPojo.class));
     }
 
-    // Verify that an existing inventory record is updated with the new quantity when found by barcode.
     @Test
-    public void testUpdateInventory_ExistingRecord() throws ApiException {
-        InventoryForm form = createInventoryForm(TEST_BARCODE, 25);
-        InventoryPojo existingInventory = createInventoryPojo();
-        when(inventoryApi.getByProductId(TEST_PRODUCT_ID)).thenReturn(existingInventory);
-        
-        inventoryDto.updateInventory(TEST_BARCODE, form);
-        verify(inventoryApi).updateInventory(eq(TEST_PRODUCT_ID), eq(25));
+    public void testAddInventoryFromList_WithFailures() throws ApiException {
+        List<InventoryForm> formList = new ArrayList<>();
+        formList.add(form);
+
+        InventoryForm invalidForm = new InventoryForm();
+        invalidForm.setProductBarcode("test123");
+        invalidForm.setQuantity(-1); // Invalid quantity
+        formList.add(invalidForm);
+
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(null);
+
+        BulkInventoryData result = inventoryDto.addInventoryFromList(formList);
+
+        assertNotNull(result);
+        assertEquals(1, result.getSuccessList().size());
+        assertEquals(1, result.getFailureList().size());
     }
 
-    //Verify that all inventory records are correctly retrieved and match the expected product ID and quantity.
+    @Test
+    public void testUpdateInventory() throws ApiException {
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(inventory);
+
+        inventoryDto.updateInventory("test123", form);
+
+        verify(inventoryApi).updateInventory(product.getId(), form.getQuantity());
+    }
+
+    @Test
+    public void testUpdateInventory_NewInventory() throws ApiException {
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(null);
+
+        inventoryDto.updateInventory("test123", form);
+
+        verify(inventoryApi).addInventory(any(InventoryPojo.class));
+    }
+
+    @Test
+    public void testUpdateInventoryFromList() throws ApiException {
+        List<InventoryForm> formList = new ArrayList<>();
+        formList.add(form);
+
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(inventory);
+
+        BulkInventoryData result = inventoryDto.updateInventoryFromList(formList);
+
+        assertNotNull(result);
+        assertEquals(1, result.getSuccessList().size());
+        assertEquals(0, result.getFailureList().size());
+        verify(inventoryApi).updateInventory(product.getId(), form.getQuantity());
+    }
+
     @Test
     public void testGetAll() throws ApiException {
-        List<InventoryPojo> inventoryList = Collections.singletonList(createInventoryPojo());
-        when(inventoryApi.getAll()).thenReturn(inventoryList);
-        
-        List<InventoryData> allInventory = inventoryDto.getAll();
-        assertTrue("Should have one inventory record", allInventory.size() == 1);
-        assertTrue("Should contain our test inventory", 
-            allInventory.stream().anyMatch(data -> data.getProductId().equals(TEST_PRODUCT_ID) && data.getQuantity() == 10));
+        List<InventoryPojo> inventoryList = new ArrayList<>();
+        inventoryList.add(inventory);
+
+        List<ProductPojo> productList = new ArrayList<>();
+        productList.add(product);
+
+        lenient().when(inventoryApi.getAll()).thenReturn(inventoryList);
+        lenient().when(productApi.getAll(0, Integer.MAX_VALUE)).thenReturn(productList);
+
+        List<InventoryData> result = inventoryDto.getAll();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(product.getBarcode(), result.get(0).getBarcode());
+        assertEquals(product.getName(), result.get(0).getProductName());
+        assertEquals(inventory.getQuantity(), result.get(0).getQuantity());
     }
 
-    // Test to verify that an ApiException is thrown when an inventory item is not found by barcode.
     @Test
-    public void testGetInventoryByBarcode_NotFound() throws ApiException {
-        when(inventoryFlow.getProductByBarcode("nonexistent")).thenThrow(new ApiException("Product not found"));
-        
-        assertThrows(ApiException.class, () -> {
-            inventoryDto.getInventoryByBarcode("nonexistent");
-        });
+    public void testGetInventoryByBarcode() throws ApiException {
+        lenient().when(inventoryFlow.getProductByBarcode("test123")).thenReturn(product);
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(inventory);
+
+        InventoryData result = inventoryDto.getInventoryByBarcode("test123");
+
+        assertNotNull(result);
+        assertEquals(product.getBarcode(), result.getBarcode());
+        assertEquals(product.getName(), result.getProductName());
+        assertEquals(inventory.getQuantity(), result.getQuantity());
     }
 
-    // Verify that the correct inventory data is returned when searching by barcode.
-    @Test
-    public void testGetInventoryByBarcode_Success() throws ApiException {
-        InventoryPojo inventory = createInventoryPojo();
-        when(inventoryApi.getByProductId(TEST_PRODUCT_ID)).thenReturn(inventory);
-        InventoryData data = inventoryDto.getInventoryByBarcode(TEST_BARCODE);
-        assertTrue("Inventory data should not be null", data != null);
-        assertTrue("Product ID should match", data.getProductId().equals(TEST_PRODUCT_ID));
-        assertTrue("Quantity should match", data.getQuantity() == 10);
+    @Test(expected = ApiException.class)
+    public void testGetInventoryByBarcode_ProductNotFound() throws ApiException {
+        lenient().when(inventoryFlow.getProductByBarcode("nonexistent")).thenThrow(new ApiException("Product not found"));
+        inventoryDto.getInventoryByBarcode("nonexistent");
     }
-}
+
+    @Test
+    public void testProcessInventoryList_AddOperation() throws ApiException {
+        List<InventoryForm> formList = new ArrayList<>();
+        formList.add(form);
+
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(null);
+
+        BulkInventoryData result = inventoryDto.addInventoryFromList(formList);
+
+        assertNotNull(result);
+        assertEquals(1, result.getSuccessList().size());
+        assertEquals(0, result.getFailureList().size());
+        verify(inventoryApi).addInventory(any(InventoryPojo.class));
+    }
+
+    @Test
+    public void testProcessInventoryList_UpdateOperation() throws ApiException {
+        List<InventoryForm> formList = new ArrayList<>();
+        formList.add(form);
+
+        lenient().when(inventoryFlow.getProductIdFromForm(form)).thenReturn(product.getId());
+        lenient().when(inventoryApi.getByProductId(product.getId())).thenReturn(inventory);
+
+        BulkInventoryData result = inventoryDto.updateInventoryFromList(formList);
+
+        assertNotNull(result);
+        assertEquals(1, result.getSuccessList().size());
+        assertEquals(0, result.getFailureList().size());
+        verify(inventoryApi).updateInventory(product.getId(), form.getQuantity());
+    }
+} 

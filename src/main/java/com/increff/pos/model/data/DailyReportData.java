@@ -14,5 +14,4 @@ public class DailyReportData {
     private Long orderCount;
     private Long totalItems;
     private Double revenue;
-
 }

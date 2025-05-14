@@ -1,8 +1,6 @@
 package com.increff.pos.util;
 
 import com.increff.pos.model.form.*;
-import com.increff.pos.pojo.ClientPojo;
-import com.increff.pos.pojo.ProductPojo;
 import java.util.Objects;
 
 public class NormalizeUtil {
@@ -62,5 +60,11 @@ public class NormalizeUtil {
             form.setPassword(form.getPassword().trim().toLowerCase());
         }
     }
+    public static void normalize(SalesReportFilterForm form) {
+        if (!Objects.isNull(form.getClientName())) {
+            form.setClientName(form.getClientName().trim().toLowerCase());
+        }
+    }
+    
 
 }

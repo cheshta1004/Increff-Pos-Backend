@@ -7,8 +7,6 @@ import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 @RestController
@@ -19,7 +17,7 @@ public class InventoryController {
     private InventoryDto inventoryDto;
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     public void addInventory(@RequestBody InventoryForm form) throws ApiException {
-        inventoryDto.addInventory(form); // Call DTO layer
+        inventoryDto.addInventory(form); 
     }
 
     @RequestMapping(path = "/add-list", method = RequestMethod.POST)
@@ -46,4 +44,5 @@ public class InventoryController {
     public List<InventoryData> getAllInventory() throws ApiException {
         return inventoryDto.getAll();
     }
+    
 }

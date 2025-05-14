@@ -2,7 +2,6 @@ package com.increff.pos.dto;
 import com.increff.pos.api.ClientApi;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.ClientData;
-import com.increff.pos.model.data.TopClientsData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.pojo.ClientPojo;

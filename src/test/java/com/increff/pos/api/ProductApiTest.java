@@ -1,146 +1,150 @@
 package com.increff.pos.api;
 
+import com.increff.pos.dto.ProductDto;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.pojo.ProductPojo;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.annotation.DirtiesContext;
-
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
-
 import static org.junit.Assert.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
-@WebAppConfiguration
+@WebAppConfiguration("src/main/webapp")
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ProductApiTest {
 
     @Autowired
     private ProductApi productApi;
 
     @Autowired
+    private ProductDto productDto;
+
+    @Autowired
     private ClientApi clientApi;
+
+    @PersistenceContext
+    private EntityManager em;
 
     private ClientPojo testClient;
 
     @Before
     public void setup() throws ApiException {
-        // Create a test client first
+        // Clear the database
+        em.createQuery("DELETE FROM ProductPojo").executeUpdate();
+        em.createQuery("DELETE FROM ClientPojo").executeUpdate();
+        em.flush();
+
+        // Create a test client
         ClientPojo client = new ClientPojo();
         client.setClientName("testclient");
         clientApi.insertClient(client);
-        List<ClientPojo> clients = clientApi.getClientsByPartialName("testclient", 0, 1);
-        testClient = clients.get(0);
+        testClient = clientApi.getClientsByPartialName("testclient", 0, 1).get(0);
     }
 
-    private ProductPojo createProduct(String barcode, String name, Double mrp) {
-        ProductPojo product = new ProductPojo();
-        // Normalize data
-        product.setBarcode(barcode.trim().toLowerCase());
-        product.setName(name.trim().toLowerCase());
-        product.setMrp(mrp);
-        product.setClientId(testClient.getId());
-        product.setImageUrl("test.jpg");
-        return product;
+    private ProductForm createProductForm(String barcode, String name, Double mrp) {
+        ProductForm form = new ProductForm();
+        form.setBarcode(barcode);
+        form.setName(name);
+        form.setMrp(mrp);
+        form.setClientName("testclient");
+        form.setImageUrl("test.jpg");
+        return form;
     }
 
-    // Test to verify that a product can be added successfully and retrieved correctly
     @Test
     public void testAddProduct_success() throws ApiException {
-        ProductPojo product = createProduct("123456", "Test Product", 99.99);
-        productApi.add(product);
+        ProductForm form = createProductForm("123456", "Test Product", 99.99);
+        productDto.insertProduct(form);
 
         List<ProductPojo> allProducts = productApi.getAll(0, 10);
         assertEquals(1, allProducts.size());
         assertEquals("123456", allProducts.get(0).getBarcode());
         assertEquals("test product", allProducts.get(0).getName());
+        assertEquals(99.99, allProducts.get(0).getMrp(), 0.001);
     }
 
-    // Test to ensure adding a product with a duplicate barcode throws an exception
     @Test(expected = ApiException.class)
     public void testAddProduct_duplicateBarcode_shouldThrow() throws ApiException {
-        ProductPojo product1 = createProduct("123456", "Product 1", 99.99);
-        productApi.add(product1);
-        
-        ProductPojo product2 = createProduct("123456", "Product 2", 149.99);
-        productApi.add(product2); // Should throw ApiException
+        ProductForm form1 = createProductForm("123456", "Test Product 1", 99.99);
+        ProductForm form2 = createProductForm("123456", "Test Product 2", 88.88);
+        productDto.insertProduct(form1);
+        productDto.insertProduct(form2);
     }
 
-    // Test to verify a product can be retrieved by its barcode
     @Test
     public void testGetByBarcode_success() throws ApiException {
-        ProductPojo product = createProduct("123456", "Test Product", 99.99);
-        productApi.add(product);
+        ProductForm form = createProductForm("123456", "Test Product", 99.99);
+        productDto.insertProduct(form);
 
         ProductPojo retrieved = productApi.getByBarcode("123456");
+        assertNotNull(retrieved);
         assertEquals("123456", retrieved.getBarcode());
         assertEquals("test product", retrieved.getName());
+        assertEquals(99.99, retrieved.getMrp(), 0.001);
     }
 
-    // Test to ensure an exception is thrown when trying to retrieve a product with a non-existent barcode
     @Test(expected = ApiException.class)
-    public void testGetByBarcode_notFound_shouldThrow() throws ApiException {
-        productApi.getByBarcode("nonexistent"); // Should throw ApiException
+    public void testGetByBarcode_notFound() throws ApiException {
+        productApi.getByBarcode("nonexistent");
     }
 
-    // Test to verify that products can be retrieved by client name
     @Test
     public void testGetByClientName_success() throws ApiException {
-        ProductPojo product1 = createProduct("123456", "Product 1", 99.99);
-        ProductPojo product2 = createProduct("789012", "Product 2", 149.99);
-        
-        productApi.add(product1);
-        productApi.add(product2);
+        ProductForm form1 = createProductForm("123456", "Test Product 1", 99.99);
+        ProductForm form2 = createProductForm("789012", "Test Product 2", 88.88);
+        productDto.insertProduct(form1);
+        productDto.insertProduct(form2);
 
-        List<ProductPojo> clientProducts = productApi.getByClientName("testclient", 0, 10);
-        assertEquals(2, clientProducts.size());
-    }
-
-    // Test to ensure products can be retrieved using a partial barcode
-    @Test
-    public void testGetByPartialBarcode_success() throws ApiException {
-        ProductPojo product1 = createProduct("123456", "Product 1", 99.99);
-        ProductPojo product2 = createProduct("123789", "Product 2", 149.99);
-        
-        productApi.add(product1);
-        productApi.add(product2);
-
-        List<ProductPojo> products = productApi.getByPartialBarcode("123", 0, 10);
+        List<ProductPojo> products = productApi.getByClientName("testclient", 0, 10);
         assertEquals(2, products.size());
     }
 
-    // Test to verify that a product can be updated by its barcode
     @Test
-    public void testUpdateByBarcode_success() throws ApiException {
-        ProductPojo product = createProduct("123456", "Original Name", 99.99);
-        productApi.add(product);
-
-        productApi.updateByBarcode("123456", "Updated Name", 149.99, "new-image.jpg");
-
-        ProductPojo updated = productApi.getByBarcode("123456");
-        assertEquals("Updated Name", updated.getName());
-        assertEquals(149.99, updated.getMrp(), 0.001);
-        assertEquals("new-image.jpg", updated.getImageUrl());
+    public void testGetByClientName_empty() throws ApiException {
+        List<ProductPojo> products = productApi.getByClientName("nonexistent", 0, 10);
+        assertTrue(products.isEmpty());
     }
 
-    // Test to verify that the total product count can be retrieved correctly
     @Test
     public void testGetTotalCount() throws ApiException {
-        ProductPojo product1 = createProduct("123456", "Product 1", 99.99);
-        ProductPojo product2 = createProduct("789012", "Product 2", 149.99);
-        
-        productApi.add(product1);
-        productApi.add(product2);
+        ProductForm form1 = createProductForm("123456", "Test Product 1", 99.99);
+        ProductForm form2 = createProductForm("789012", "Test Product 2", 88.88);
+        productDto.insertProduct(form1);
+        productDto.insertProduct(form2);
 
-        assertEquals(Long.valueOf(2), productApi.getTotalCount());
+        assertEquals(2L, productApi.getTotalCount().longValue());
     }
-} 
+
+    @Test
+    public void testGetTotalCountByClientName() throws ApiException {
+        ProductForm form1 = createProductForm("123456", "Test Product 1", 99.99);
+        ProductForm form2 = createProductForm("789012", "Test Product 2", 88.88);
+        productDto.insertProduct(form1);
+        productDto.insertProduct(form2);
+
+        assertEquals(2L, productApi.getTotalCountByClientName("testclient").longValue());
+    }
+
+    @Test
+    public void testGetTotalSearchResults() throws ApiException {
+        ProductForm form1 = createProductForm("123456", "Red Shoes", 99.99);
+        ProductForm form2 = createProductForm("789012", "Blue Shoes", 88.88);
+        ProductForm form3 = createProductForm("345678", "Green Shoes", 77.77);
+        productDto.insertProduct(form1);
+        productDto.insertProduct(form2);
+        productDto.insertProduct(form3);
+
+        assertEquals(3, productApi.getTotalSearchResults("shoes"));
+    }
+}

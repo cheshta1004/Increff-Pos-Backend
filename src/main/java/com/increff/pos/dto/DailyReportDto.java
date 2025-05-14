@@ -6,30 +6,19 @@ import com.increff.pos.pojo.DailyReportPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.time.ZonedDateTime;
 
 @Component
 public class DailyReportDto {
-
     @Autowired
     private DailyReportApi dailyReportApi;
 
     public List<DailyReportData> getAllDailyReports() {
-        return convertToDataList(dailyReportApi.getAll());
+        List<DailyReportPojo> pojos = dailyReportApi.getAllDailyReports();
+        return DtoHelper.convertToDataList(pojos);
     }
 
-    private List<DailyReportData> convertToDataList(List<DailyReportPojo> pojos) {
-        return pojos.stream()
-            .map(this::convertToData)
-            .collect(Collectors.toList());
+    public void recalculateDailyReport(ZonedDateTime date) {
+        dailyReportApi.recalculateDailyReport(date);
     }
-
-    private DailyReportData convertToData(DailyReportPojo pojo) {
-        return new DailyReportData(
-            pojo.getDate().toString(),
-            pojo.getOrderCount(),
-            pojo.getTotalItems(),
-            pojo.getRevenue()
-        );
-    }
-} 
+}

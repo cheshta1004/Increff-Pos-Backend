@@ -2,12 +2,10 @@ package com.increff.pos.api;
 
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.TopClientsData;
 import com.increff.pos.pojo.ClientPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +20,7 @@ public class ClientApi {
         if (Objects.nonNull(existing)) {
             throw new ApiException("Client with name '" + clientPojo.getClientName() + "' already exists.");
         }
-        clientDao.persist(clientPojo);
+        clientDao.insert(clientPojo);
     }
 
     public List<ClientPojo> getAllClient(int page, int size) {
@@ -53,8 +51,12 @@ public class ClientApi {
     }
     
 
-    public List<ClientPojo> getClientsByPartialName(String partialName, int page, int size) {
-        return clientDao.selectByPartialName(partialName, page, size);
+    public List<ClientPojo> getClientsByPartialName(String partialName, int page, int size) throws ApiException {
+        List<ClientPojo> clients = clientDao.selectByPartialName(partialName, page, size);
+        if (clients.isEmpty()) {
+            throw new ApiException("Client with name '" + partialName + "' does not exist.");
+        }
+        return clients;
     }
 
     public long getTotalClients() {

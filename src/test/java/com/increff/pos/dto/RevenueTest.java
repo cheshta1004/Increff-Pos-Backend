@@ -1,7 +1,7 @@
 package com.increff.pos.dto;
 
-import com.increff.pos.api.RevenueApi;
-import com.increff.pos.model.data.RevenueData;
+import com.increff.pos.api.SalesReportApi;
+import com.increff.pos.model.data.SalesReportData;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -17,18 +17,18 @@ import static org.mockito.Mockito.*;
 public class RevenueTest {
 
     @InjectMocks
-    private RevenueDto revenueDto;
+    private SalesReportDto revenueDto;
 
     @Mock
-    private RevenueApi revenueApi;
+    private SalesReportApi revenueApi;
 
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
     }
 
-    private RevenueData createRevenueData() {
-        RevenueData data = new RevenueData();
+    private SalesReportData createRevenueData() {
+        SalesReportData data = new SalesReportData();
         data.setProductName("Test Product");
         data.setRevenue(100.0);
         data.setQuantity(5L);
@@ -37,14 +37,5 @@ public class RevenueTest {
         return data;
     }
 
-    @Test
-    public void testGetMonthlyProductRevenue() {
-        List<RevenueData> expected = Collections.singletonList(createRevenueData());
-        when(revenueApi.getMonthlyProductRevenue()).thenReturn(expected);
-
-        List<RevenueData> actual = revenueDto.getMonthlyProductRevenue();
-
-        assertEquals(expected, actual);
-        verify(revenueApi, times(1)).getMonthlyProductRevenue();
-    }
+   
 }

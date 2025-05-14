@@ -75,7 +75,7 @@ public class ClientTest {
         ClientForm form = new ClientForm();
         form.setClientName("clientABC");
         clientDto.insertClient(form);
-        PaginatedResponse<ClientData> response = clientDto.getClientsByPartialName("cli", 0, 5);
+        PaginatedResponse<ClientData> response = clientDto.getClientsByPartialName("cli", 0, 1);
         assertEquals(1, response.getContent().size());
         assertEquals("clientabc", response.getContent().get(0).getClientName());
     }

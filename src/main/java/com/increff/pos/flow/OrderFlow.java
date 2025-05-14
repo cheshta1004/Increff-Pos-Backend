@@ -2,20 +2,13 @@ package com.increff.pos.flow;
 
 import com.increff.pos.api.InventoryApi;
 import com.increff.pos.api.ProductApi;
-import com.increff.pos.dto.DtoHelper;
+import com.increff.pos.api.DailyReportApi;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.OrderData;
-import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.pojo.InventoryPojo;
-import com.increff.pos.pojo.OrderItemPojo;
-import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.ZonedDateTime;
 
 @Component
 public class OrderFlow {
@@ -25,6 +18,30 @@ public class OrderFlow {
 
     @Autowired
     private InventoryApi inventoryApi;
+
+    @Autowired
+    private DailyReportApi dailyReportApi;
+
+    public void validateInventory(String barcode, Integer quantity) throws ApiException {
+        ProductPojo product = getProductByBarcode(barcode);
+        InventoryPojo inventory = getInventoryByProductId(product.getId());
+        if (inventory.getQuantity() < quantity) {
+            throw new ApiException("Insufficient inventory for product: " + product.getName());
+        }
+    }
+
+    public void reduceInventory(Integer productId, Integer quantity) throws ApiException {
+        InventoryPojo inventory = getInventoryByProductId(productId);
+        if (inventory.getQuantity() < quantity) {
+            throw new ApiException("Insufficient inventory for product ID: " + productId);
+        }
+        inventoryApi.updateInventory(productId, inventory.getQuantity() - quantity);
+    }
+
+    public void restoreInventory(Integer productId, Integer quantity) throws ApiException {
+        InventoryPojo inventory = getInventoryByProductId(productId);
+        inventoryApi.updateInventory(productId, inventory.getQuantity() + quantity);
+    }
 
     public ProductPojo getProductByBarcode(String barcode) throws ApiException {
         return productApi.getByBarcode(barcode);
@@ -38,15 +55,7 @@ public class OrderFlow {
         return inventoryApi.getByProductId(productId);
     }
 
-    public void reduceInventory(Integer productId, Integer quantity) throws ApiException {
-        inventoryApi.reduceInventory(productId, quantity);
-    }
-
-    public OrderData convertOrderPojoToData(OrderPojo pojo, List<OrderItemPojo> itemPojoList) throws ApiException {
-        ProductPojo product = null;
-        if (!itemPojoList.isEmpty()) {
-            product = getProductById(itemPojoList.get(0).getProductId());
-        }
-        return DtoHelper.convertOrderPojoToData(pojo, itemPojoList, product);
+    public void recalculateDailyReport(ZonedDateTime date) {
+        dailyReportApi.recalculateDailyReport(date);
     }
 }

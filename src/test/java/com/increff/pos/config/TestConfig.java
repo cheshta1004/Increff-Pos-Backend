@@ -11,6 +11,9 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -25,7 +28,9 @@ import java.util.Properties;
     }
 )
 @EnableTransactionManagement
-public class TestConfig {
+@EnableScheduling
+@Profile("test")
+public class TestConfig implements SchedulingConfigurer {
 
     @Bean
     public DataSource dataSource() {
@@ -85,5 +90,11 @@ public class TestConfig {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setValidationMessageSource(messageSource);
         return validator;
+    }
+
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        // Disable all scheduled tasks in test profile
+        taskRegistrar.setScheduler(null);
     }
 }

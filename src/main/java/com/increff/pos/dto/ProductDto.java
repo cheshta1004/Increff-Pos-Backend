@@ -12,17 +12,17 @@ import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.flow.ProductFlow;
 import com.increff.pos.util.NormalizeUtil;
 import com.increff.pos.util.ValidationUtil;
-import com.increff.pos.dto.DtoHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
-@Service
+@Component
 @Transactional
 public class ProductDto {
 
@@ -123,5 +123,17 @@ public class ProductDto {
         int totalPages = (int) Math.ceil((double) totalItems / size);
         
         return new PaginatedResponse<>(productDataList, page, size, totalItems, totalPages);
+    }
+
+    public PaginatedResponse<ProductData> searchProducts(String searchTerm, String clientName, String barcode, int page, int size) throws ApiException {
+        if (!Objects.isNull(searchTerm)) {
+            return searchProducts(searchTerm, page, size);
+        } else if (!Objects.isNull(clientName)) {
+            return getProductsByClientName(clientName, page, size);
+        } else if (!Objects.isNull(barcode)) {
+            return getProductsByPartialBarcode(barcode, page, size);
+        } else {
+            return getAllProducts(page, size);
+        }
     }
 }

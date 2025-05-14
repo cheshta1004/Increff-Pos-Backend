@@ -18,12 +18,4 @@ public class OrderDao extends AbstractDao<OrderPojo>{
         cq.select(root).where(cb.equal(root.get("status"), status));
         return em().createQuery(cq).getResultList();
     }
-    public void updateStatus(Integer orderId, OrderStatus status) {
-        CriteriaBuilder cb = em().getCriteriaBuilder();
-        CriteriaUpdate<OrderPojo> cu = cb.createCriteriaUpdate(OrderPojo.class);
-        Root<OrderPojo> root = cu.from(OrderPojo.class);
-        cu.set("status", status);
-        cu.where(cb.equal(root.get("id"), orderId));
-        em().createQuery(cu).executeUpdate();
-    }
 }

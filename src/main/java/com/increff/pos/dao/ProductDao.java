@@ -3,13 +3,11 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.pojo.ClientPojo;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import com.increff.pos.exception.ApiException;
 
 @Repository
 @Transactional
@@ -19,48 +17,22 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         super(ProductPojo.class);
     }
 
-    public List<ProductPojo> getAllProductsByClientId(Integer clientId) {
-        CriteriaBuilder cb = em().getCriteriaBuilder();
-        CriteriaQuery<ProductPojo> cq = cb.createQuery(ProductPojo.class);
-        Root<ProductPojo> root = cq.from(ProductPojo.class);
-        cq.select(root).where(cb.equal(root.get("clientId"), clientId));
-        return em().createQuery(cq).getResultList();
-    }
-
-    public List<ProductPojo> filterProducts(String productName, Integer clientId) {
-        CriteriaBuilder cb = em().getCriteriaBuilder();
-        CriteriaQuery<ProductPojo> cq = cb.createQuery(ProductPojo.class);
-        Root<ProductPojo> root = cq.from(ProductPojo.class);
-
-        List<Predicate> predicates = new ArrayList<>();
-
-        if (!Objects.isNull(productName) && !productName.trim().isEmpty()) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%" + productName.toLowerCase() + "%"));
-        }
-        if (!Objects.isNull(clientId)) {
-            predicates.add(cb.equal(root.get("clientId"), clientId));
-        }
-        cq.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
-        return em().createQuery(cq).getResultList();
-    }
-
-    public List<ProductPojo> selectByClientName(String clientName, int page, int size) {
-
+    public List<ProductPojo> selectByClientName(String clientName, int page, int size) throws ApiException {
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<Integer> clientQuery = cb.createQuery(Integer.class);
         Root<ClientPojo> clientRoot = clientQuery.from(ClientPojo.class);
         clientQuery.select(clientRoot.get("id"))
-                  .where(cb.like(cb.lower(clientRoot.get("clientName")), 
-                               "%" + clientName.toLowerCase().trim() + "%"));
+                .where(cb.like(cb.lower(clientRoot.get("clientName")),
+                            "%" + clientName.toLowerCase().trim() + "%"));
         List<Integer> clientIds = em().createQuery(clientQuery).getResultList();
 
         if (clientIds.isEmpty()) {
-            return new ArrayList<>();
+            throw new ApiException("No clients found with name: " + clientName);
         }
         CriteriaQuery<ProductPojo> productQuery = cb.createQuery(ProductPojo.class);
         Root<ProductPojo> productRoot = productQuery.from(ProductPojo.class);
         productQuery.select(productRoot)
-                   .where(productRoot.get("clientId").in(clientIds));
+                .where(productRoot.get("clientId").in(clientIds));
 
         TypedQuery<ProductPojo> query = em().createQuery(productQuery);
         query.setFirstResult(page * size);
@@ -88,14 +60,14 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         return em().createQuery(cq).getSingleResult();
     }
 
-    public Long getTotalCountByClientName(String clientName) {
+    public Long getTotalCountByClientName(String clientName) throws ApiException {
         // First get the client ID from the client name
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<Integer> clientQuery = cb.createQuery(Integer.class);
         Root<ClientPojo> clientRoot = clientQuery.from(ClientPojo.class);
         clientQuery.select(clientRoot.get("id"))
-                  .where(cb.like(cb.lower(clientRoot.get("clientName")), 
-                               "%" + clientName.toLowerCase().trim() + "%"));
+                .where(cb.like(cb.lower(clientRoot.get("clientName")), 
+                            "%" + clientName.toLowerCase().trim() + "%"));
         List<Integer> clientIds = em().createQuery(clientQuery).getResultList();
 
         if (clientIds.isEmpty()) {
@@ -104,7 +76,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         CriteriaQuery<Long> productQuery = cb.createQuery(Long.class);
         Root<ProductPojo> productRoot = productQuery.from(ProductPojo.class);
         productQuery.select(cb.count(productRoot))
-                   .where(productRoot.get("clientId").in(clientIds));
+                .where(productRoot.get("clientId").in(clientIds));
         return em().createQuery(productQuery).getSingleResult();
     }
 

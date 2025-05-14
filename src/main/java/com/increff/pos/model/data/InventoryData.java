@@ -8,4 +8,6 @@ public class InventoryData {
     private Integer id;
     private Integer productId;
     private Integer quantity;
+    private String barcode;
+    private String productName;
 }
