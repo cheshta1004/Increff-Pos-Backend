@@ -1,6 +1,7 @@
 package com.increff.pos.dto;
 
 import com.increff.pos.api.DailyReportApi;
+import com.increff.pos.dto.helper.DtoHelper;
 import com.increff.pos.model.data.DailyReportData;
 import com.increff.pos.pojo.DailyReportPojo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,14 @@ public class DailyReportDto {
     private DailyReportApi dailyReportApi;
 
     public List<DailyReportData> getAllDailyReports() {
-        List<DailyReportPojo> pojos = dailyReportApi.getAllDailyReports();
-        return DtoHelper.convertToDataList(pojos);
+        return DtoHelper.convertToDataList(dailyReportApi.getAllDailyReports());
     }
 
     public void recalculateDailyReport(ZonedDateTime date) {
         dailyReportApi.recalculateDailyReport(date);
+    }
+
+    public List<DailyReportData> getDailyReportsByDateRange(ZonedDateTime startDate, ZonedDateTime endDate) {
+        return DtoHelper.convertToDataList(dailyReportApi.getDailyReportsByDateRange(startDate, endDate));
     }
 }

@@ -13,10 +13,9 @@ public class InventoryFlow {
     private ProductApi productApi;
 
     public ProductPojo getProductByBarcode(String barcode) throws ApiException {
-        return productApi.getByBarcode(barcode.trim().toLowerCase());
+        return productApi.getByBarcode(barcode);
     }
-
-    public Integer getProductIdFromForm(InventoryForm form) throws ApiException {
+    public Integer getProductIdFromForm(InventoryForm form) throws ApiException{
         ProductPojo product = getProductByBarcode(form.getProductBarcode());
         return product.getId();
     }

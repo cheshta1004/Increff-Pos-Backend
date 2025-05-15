@@ -2,6 +2,7 @@ package com.increff.pos.dto;
 
 import com.increff.pos.api.InventoryApi;
 import com.increff.pos.api.ProductApi;
+import com.increff.pos.dto.helper.DtoHelper;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.BulkInventoryData;
 import com.increff.pos.model.data.OperationResponse;
@@ -38,7 +39,7 @@ public class InventoryDto {
         NormalizeUtil.normalize(form);
         ValidationUtil.validate(form);
         Integer productId = inventoryFlow.getProductIdFromForm(form);
-        InventoryPojo pojo =DtoHelper.convertInventoryFormToPojo(form,productId);
+        InventoryPojo pojo = DtoHelper.convertInventoryFormToPojo(form,productId);
         inventoryApi.addInventory(pojo);
     }
 
@@ -72,8 +73,18 @@ public class InventoryDto {
 
     public InventoryData getInventoryByBarcode(String barcode) throws ApiException {
         ProductPojo product = inventoryFlow.getProductByBarcode(barcode.trim().toLowerCase());
-        InventoryPojo inventory = inventoryApi.getByProductId(product.getId());
+        InventoryPojo inventory = getOrCreateInventory(product.getId());
         return DtoHelper.convertInventoryPojoToData(inventory, product);
+    }
+
+    private InventoryPojo getOrCreateInventory(Integer productId) throws ApiException {
+        InventoryPojo inventory = inventoryApi.getByProductId(productId);
+        if (Objects.isNull(inventory)) {
+            inventory = new InventoryPojo();
+            inventory.setProductId(productId);
+            inventory.setQuantity(0);
+        }
+        return inventory;
     }
 
     private BulkInventoryData processInventoryList(List<InventoryForm> formList, String operation) {
@@ -109,6 +120,7 @@ public class InventoryDto {
 
     private void processUpdateInventory(InventoryForm form) throws ApiException {
         Integer productId = inventoryFlow.getProductIdFromForm(form);
+        InventoryPojo inventory = getOrCreateInventory(productId);
         inventoryApi.updateInventory(productId, form.getQuantity());
     }
 

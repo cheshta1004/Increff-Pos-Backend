@@ -2,6 +2,7 @@ package com.increff.pos.dto;
 
 import com.increff.pos.api.UserApi;
 import com.increff.pos.config.RoleConfig;
+import com.increff.pos.dto.helper.DtoHelper;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.LoginData;
 import com.increff.pos.model.enums.Role;
@@ -20,20 +21,18 @@ public class UserDto {
     private RoleConfig roleConfig;
     @Autowired
     private UserApi userApi;
-
+//todo -
     public String signup(SignupForm form) throws ApiException {
         ValidationUtil.validate(form);
         NormalizeUtil.normalize(form);
-        Role role = roleConfig.isSupervisor(form.getEmail()) ? Role.SUPERVISOR : Role.OPERATOR;
-        UserPojo pojo = DtoHelper.convertSignupFormToPojo(form, role);
-        return userApi.signup(pojo);
+        return userApi.signup(DtoHelper.convertSignupFormToPojo(form, roleConfig.isSupervisor(
+            form.getEmail()) ? Role.SUPERVISOR : Role.OPERATOR));
     }
 
     public LoginData login(LoginForm form) throws ApiException {
         ValidationUtil.validate(form);
         NormalizeUtil.normalize(form);
-        UserPojo pojo = DtoHelper.convertLoginFormToPojo(form);
-        UserPojo user = userApi.login(pojo);
+        UserPojo user = userApi.login(DtoHelper.convertLoginFormToPojo(form));
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return DtoHelper.convertUserPojoToLoginData(user, token);

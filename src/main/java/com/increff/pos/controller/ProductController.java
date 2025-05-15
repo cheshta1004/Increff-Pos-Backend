@@ -52,7 +52,7 @@ public class ProductController {
             @RequestParam(required = false) String barcode,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiException {
-        return productDto.searchProducts(searchTerm, clientName, barcode, page, size);
+        return productDto.searchProducts(clientName, barcode, page, size);
     }
     @RequestMapping(path = "/update/{barcode}", method = RequestMethod.PUT)
     public void updateProductByBarcode(@PathVariable String barcode, @RequestBody ProductForm form) throws ApiException {

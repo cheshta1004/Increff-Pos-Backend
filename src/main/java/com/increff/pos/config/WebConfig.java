@@ -12,10 +12,12 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.List;
 
 @Configuration
 @EnableWebMvc
+@EnableScheduling
 @PropertySource("classpath:employee-app.properties")
 @ComponentScan(basePackages = {
     "com.increff.pos.api",
@@ -26,7 +28,9 @@ import java.util.List;
     "com.increff.pos.util",
     "com.increff.pos.dto",
     "com.increff.pos.model",
-    "com.increff.pos.pojo"
+    "com.increff.pos.pojo",
+    "com.increff.pos.scheduler",
+    "com.increff.pos"
 })
 public class WebConfig implements WebMvcConfigurer {
     

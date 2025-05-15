@@ -10,6 +10,7 @@ import javax.validation.ValidatorFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Objects;
 
 @Service
 public class ValidationUtil {
@@ -29,6 +30,17 @@ public class ValidationUtil {
             errorList.add(error);
         }
         throw new ApiException( "Validation failed", errorList);
+    }
+
+    public static <T> void checkNonNull(T obj, String errorMessage) throws ApiException {
+        if (Objects.nonNull(obj)) {
+            throw new ApiException(errorMessage);
+        }
+    }
+    public static <T> void checkNull(T obj, String errorMessage) throws ApiException {
+        if (Objects.isNull(obj)) {
+            throw new ApiException(errorMessage);
+        }
     }
 }
 

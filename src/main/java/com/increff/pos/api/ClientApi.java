@@ -3,11 +3,11 @@ package com.increff.pos.api;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.util.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional
@@ -17,9 +17,7 @@ public class ClientApi {
 
     public void insertClient(ClientPojo clientPojo) throws ApiException {
         ClientPojo existing = clientDao.select("clientName", clientPojo.getClientName());
-        if (Objects.nonNull(existing)) {
-            throw new ApiException("Client with name '" + clientPojo.getClientName() + "' already exists.");
-        }
+        ValidationUtil.checkNonNull(existing, "Client with name '" + clientPojo.getClientName() + "' already exists.");
         clientDao.insert(clientPojo);
     }
 
@@ -29,33 +27,22 @@ public class ClientApi {
 
     public ClientPojo getClientById(Integer id) throws ApiException {
         ClientPojo client = clientDao.select(id);
-        if (Objects.isNull(client)) {
-            throw new ApiException("Client with id " + id + " does not exist.");
-        }
+        ValidationUtil.checkNull(client, "Client with id " + id + " does not exist.");
         return client;
     }
 
     public void updateClient(String clientName, String newClientName) throws ApiException {
         ClientPojo existing = clientDao.select("clientName", newClientName);
         ClientPojo client = clientDao.select("clientName", clientName);
-    
-        if (Objects.isNull(client)) {
-            throw new ApiException("Client with name '" + clientName + "' not found.");
-        }
-    
-        if (Objects.nonNull(existing) && !existing.getId().equals(client.getId())) {
-            throw new ApiException("Client name '" + newClientName + "' is already in use.");
-        }
-    
+        ValidationUtil.checkNull(client, "Client with name '" + clientName + "' not found.");
+        ValidationUtil.checkNonNull(existing, "Client with name '" + newClientName + "' already exists.");
         client.setClientName(newClientName);
     }
     
 
     public List<ClientPojo> getClientsByPartialName(String partialName, int page, int size) throws ApiException {
         List<ClientPojo> clients = clientDao.selectByPartialName(partialName, page, size);
-        if (clients.isEmpty()) {
-            throw new ApiException("Client with name '" + partialName + "' does not exist.");
-        }
+        ValidationUtil.checkNull(clients, "Client with name '" + partialName + "' does not exist.");
         return clients;
     }
 

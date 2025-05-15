@@ -1,4 +1,4 @@
-package com.increff.pos.dto;
+package com.increff.pos.dto.helper;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.*;

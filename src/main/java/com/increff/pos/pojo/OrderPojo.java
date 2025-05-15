@@ -10,15 +10,16 @@ import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
+import javax.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "orders")
+@Table(name = "orders", uniqueConstraints = @UniqueConstraint(columnNames = "time"))
 public class OrderPojo extends AbstractVersionedPojo {
-// todo check for indexing , unique constraint
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

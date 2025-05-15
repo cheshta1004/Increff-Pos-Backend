@@ -4,11 +4,7 @@ import com.increff.pos.model.form.*;
 import java.util.Objects;
 
 public class NormalizeUtil {
-    public static void normalize(OrderItemForm form) {
-        if (!Objects.isNull(form.getBarcode())) {
-            form.setBarcode(form.getBarcode().trim().toLowerCase());
-        }
-    }
+
     public static void normalize(ClientForm form) {
         if (!Objects.isNull(form.getClientName())) {
             form.setClientName(form.getClientName().trim().toLowerCase());

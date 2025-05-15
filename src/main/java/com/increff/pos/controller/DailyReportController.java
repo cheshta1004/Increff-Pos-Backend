@@ -40,4 +40,14 @@ public class DailyReportController {
         }
         return "Daily reports recalculated successfully for the last 30 days";
     }
+
+    @RequestMapping(path = "/daily/range", method = RequestMethod.GET)
+    public List<DailyReportData> getDailyReportsByDateRange(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        ZonedDateTime start = ZonedDateTime.parse(startDate + "T00:00:00+05:30");
+        ZonedDateTime end = ZonedDateTime.parse(endDate + "T23:59:59+05:30");
+        return dailyReportDto.getDailyReportsByDateRange(start, end);
+    }
+
 } 

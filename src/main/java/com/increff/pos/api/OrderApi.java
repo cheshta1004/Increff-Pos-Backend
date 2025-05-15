@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import com.increff.pos.util.ValidationUtil;
 import java.util.Objects;
 @Service
 @Transactional
@@ -31,13 +32,7 @@ public class OrderApi {
 
     public void updateStatus(Integer id, OrderStatus status) throws ApiException {
         OrderPojo orderPojo = orderDao.select(id);
-        if (Objects.isNull(orderPojo)) {
-            throw new ApiException("Order not found");
-        }
-        if (orderPojo.getStatus() == OrderStatus.COMPLETED || orderPojo.getStatus() == OrderStatus.CANCELLED) {
-            throw new ApiException("Cannot change status of a completed or cancelled order");
-        }
-        
+        ValidationUtil.checkNull(orderPojo, "Order not found");
         orderPojo.setStatus(status);
     }
 
@@ -55,9 +50,7 @@ public class OrderApi {
 
     public OrderPojo getOrderById(Integer orderId) throws ApiException {
         OrderPojo orderPojo = orderDao.select(orderId);
-        if (Objects.isNull(orderPojo)) {
-            throw new ApiException("Order not found for ID: " + orderId);
-        }
+        ValidationUtil.checkNull(orderPojo, "Order not found for ID: " + orderId);
         return orderPojo;
     }
 }
