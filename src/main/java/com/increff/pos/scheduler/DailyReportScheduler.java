@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment;
 @Service
 @EnableScheduling
 public class DailyReportScheduler {
-   private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
     @Value("${scheduler.enabled:true}")
     private boolean schedulerEnabled;

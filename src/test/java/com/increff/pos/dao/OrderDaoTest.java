@@ -42,11 +42,5 @@ public class OrderDaoTest {
         assertEquals("Alice", found.getCustomerName());
     }
 
-    @Test
-    public void testSelectByStatus() {
-        orderDao.insert(createOrder("Bob", "1111111111", OrderStatus.CREATED));
-        orderDao.insert(createOrder("Carol", "2222222222", OrderStatus.COMPLETED));
-        List<OrderPojo> created = orderDao.selectByStatus(OrderStatus.CREATED);
-        assertTrue(created.size() >= 1);
-    }
+
 }

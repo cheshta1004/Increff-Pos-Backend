@@ -44,7 +44,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<ProductPojo> cq = cb.createQuery(ProductPojo.class);
         Root<ProductPojo> root = cq.from(ProductPojo.class);
-        Predicate barcodePredicate = cb.like(cb.lower(root.get("barcode")), "%" + barcode.toLowerCase().trim() + "%");
+        Predicate barcodePredicate = cb.like(cb.lower(root.get("barcode")),"%"+barcode.toLowerCase().trim()+"%");
         cq.select(root).where(barcodePredicate);
         TypedQuery<ProductPojo> query = em().createQuery(cq);
         query.setFirstResult(page * size);
@@ -61,7 +61,6 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     }
 
     public Long getTotalCountByClientName(String clientName) throws ApiException {
-        // First get the client ID from the client name
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<Integer> clientQuery = cb.createQuery(Integer.class);
         Root<ClientPojo> clientRoot = clientQuery.from(ClientPojo.class);
@@ -84,39 +83,8 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<ProductPojo> root = cq.from(ProductPojo.class);
-        Predicate barcodePredicate = cb.like(cb.lower(root.get("barcode")), "%" + barcode.toLowerCase().trim() + "%");
+        Predicate barcodePredicate = cb.like(cb.lower(root.get("barcode")),"%"+barcode.toLowerCase().trim()+"%");
         cq.select(cb.count(root)).where(barcodePredicate);
-        return em().createQuery(cq).getSingleResult();
-    }
-
-    public List<ProductPojo> searchProducts(String searchTerm, int page, int size) {
-        CriteriaBuilder cb = em().getCriteriaBuilder();
-        CriteriaQuery<ProductPojo> cq = cb.createQuery(ProductPojo.class);
-        Root<ProductPojo> root = cq.from(ProductPojo.class);
-
-        Predicate searchPredicate = cb.or(
-            cb.like(cb.lower(root.get("name")), "%" + searchTerm.toLowerCase().trim() + "%"),
-            cb.like(cb.lower(root.get("barcode")), "%" + searchTerm.toLowerCase().trim() + "%")
-        );
-        
-        cq.select(root).where(searchPredicate);
-        TypedQuery<ProductPojo> query = em().createQuery(cq);
-        query.setFirstResult(page * size);
-        query.setMaxResults(size);
-        return query.getResultList();
-    }
-
-    public long getTotalSearchResults(String searchTerm) {
-        CriteriaBuilder cb = em().getCriteriaBuilder();
-        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<ProductPojo> root = cq.from(ProductPojo.class);
-
-        Predicate searchPredicate = cb.or(
-            cb.like(cb.lower(root.get("name")), "%" + searchTerm.toLowerCase().trim() + "%"),
-            cb.like(cb.lower(root.get("barcode")), "%" + searchTerm.toLowerCase().trim() + "%")
-        );
-        
-        cq.select(cb.count(root)).where(searchPredicate);
         return em().createQuery(cq).getSingleResult();
     }
 

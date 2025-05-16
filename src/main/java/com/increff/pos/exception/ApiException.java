@@ -14,12 +14,10 @@ public class ApiException extends Exception {
 	private ApiStatus status;
 	private List<FieldErrorData> fieldErrors;
 
-	// Basic constructor
 	public ApiException(String message) {
 		super(message);
 	}
 
-	// Constructor for validation errors
 	public ApiException(String message, List<FieldErrorData> fieldErrors) {
 		super(message);
 		this.status = status;

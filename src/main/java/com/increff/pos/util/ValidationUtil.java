@@ -2,7 +2,6 @@ package com.increff.pos.util;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.exception.FieldErrorData;
-import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 
-@Service
 public class ValidationUtil {
     public static <T> void validate(T obj) throws ApiException {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

@@ -183,22 +183,6 @@ public class OrderApiTest {
     }
 
     @Test
-    public void testGetOrdersByStatus_success() {
-        OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now());
-        order.setStatus(OrderStatus.COMPLETED);
-        order.setCustomerName("Another Customer");
-        order.setCustomerContact("5555555555");
-        orderApi.insertOrder(order);
-
-        List<OrderPojo> createdOrders = orderApi.getOrdersByStatus(OrderStatus.CREATED);
-        assertEquals(1, createdOrders.size());
-
-        List<OrderPojo> completedOrders = orderApi.getOrdersByStatus(OrderStatus.COMPLETED);
-        assertEquals(1, completedOrders.size());
-    }
-
-    @Test
     public void testGetOrderById_success() throws ApiException {
         OrderPojo retrieved = orderApi.getOrderById(testOrder.getId());
         assertNotNull(retrieved);
@@ -219,9 +203,5 @@ public class OrderApiTest {
         assertTrue(items.isEmpty());
     }
 
-    @Test
-    public void testGetOrdersByStatus_empty() {
-        List<OrderPojo> cancelledOrders = orderApi.getOrdersByStatus(OrderStatus.CANCELLED);
-        assertTrue(cancelledOrders.isEmpty());
-    }
+
 } 

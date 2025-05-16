@@ -3,7 +3,6 @@ package com.increff.pos.config;
 import java.util.Properties;
 
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +15,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
 
 @EnableTransactionManagement
 @Configuration
@@ -83,5 +83,10 @@ public class DbConfig {
 		JpaTransactionManager bean = new JpaTransactionManager();
 		bean.setEntityManagerFactory(emf.getObject());
 		return bean;
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
 	}
 }

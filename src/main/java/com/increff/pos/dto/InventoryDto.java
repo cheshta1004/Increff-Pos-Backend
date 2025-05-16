@@ -65,7 +65,7 @@ public class InventoryDto {
         }
     }
 
-    public List<InventoryData> getAll() throws ApiException {
+    public List<InventoryData> getAll()  {
         List<InventoryPojo> pojoList = inventoryApi.getAll();
         List<ProductPojo> productList = productApi.getAll(0, Integer.MAX_VALUE);
         return DtoHelper.convertInventoryPojoListToData(pojoList, productList);

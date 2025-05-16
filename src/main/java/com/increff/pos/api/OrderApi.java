@@ -44,9 +44,6 @@ public class OrderApi {
         return orderItemDao.selectByOrderId(orderId);
     }
 
-    public List<OrderPojo> getOrdersByStatus(OrderStatus status) {
-        return orderDao.selectByStatus(status);
-    }
 
     public OrderPojo getOrderById(Integer orderId) throws ApiException {
         OrderPojo orderPojo = orderDao.select(orderId);

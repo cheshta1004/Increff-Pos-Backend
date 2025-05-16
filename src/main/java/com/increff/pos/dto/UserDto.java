@@ -21,7 +21,7 @@ public class UserDto {
     private RoleConfig roleConfig;
     @Autowired
     private UserApi userApi;
-//todo -
+
     public String signup(SignupForm form) throws ApiException {
         ValidationUtil.validate(form);
         NormalizeUtil.normalize(form);

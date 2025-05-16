@@ -30,7 +30,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<ClientPojo> cq = cb.createQuery(ClientPojo.class);
         Root<ClientPojo> root = cq.from(ClientPojo.class);
-        Predicate namePredicate = cb.like(cb.lower(root.get("clientName")), "%" + partialName.toLowerCase() + "%");
+        Predicate namePredicate = cb.like(cb.lower(root.get("clientName")),"%" + partialName.toLowerCase()+ "%");
         cq.where(namePredicate);
         TypedQuery<ClientPojo> query = em().createQuery(cq);
         query.setFirstResult(page * size);
@@ -50,7 +50,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
         CriteriaBuilder cb = em().getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<ClientPojo> root = cq.from(ClientPojo.class);
-        Predicate namePredicate = cb.like(cb.lower(root.get("clientName")), "%" + partialName.toLowerCase() + "%");
+        Predicate namePredicate = cb.like(cb.lower(root.get("clientName")),"%"+ partialName.toLowerCase() + "%");
         cq.where(namePredicate);
         cq.select(cb.count(root));
         return em().createQuery(cq).getSingleResult();

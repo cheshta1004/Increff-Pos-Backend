@@ -47,7 +47,8 @@ public class InventoryApi {
         ValidationUtil.checkNull(existing, "Inventory not found for productId: " + productId);
         Integer currentQuantity = existing.getQuantity();
         if (currentQuantity < quantityToReduce) {
-            throw new ApiException("Not enough inventory to reduce. Available: " + currentQuantity + ", requested: " + quantityToReduce);
+            throw new ApiException("Not enough inventory to reduce. Available: " + currentQuantity + ", requested: " +
+                    quantityToReduce);
         }
         existing.setQuantity(currentQuantity - quantityToReduce);
     }

@@ -17,10 +17,11 @@ import java.util.ArrayList;
 public class ProductApi {
     @Autowired
     private ProductDao productDao;
-// todo dont normalize in api
+
     public void add(ProductPojo productPojo) throws ApiException {
         ProductPojo existing = productDao.select("barcode", productPojo.getBarcode());
-        ValidationUtil.checkNonNull(existing, "Product with barcode '" + productPojo.getBarcode() + "' already exists.");
+        ValidationUtil.checkNonNull(existing, "Product with barcode '" + productPojo.getBarcode()
+                + "' already exists.");
         productDao.insert(productPojo);
     }
 
@@ -62,21 +63,13 @@ public class ProductApi {
         ValidationUtil.checkNull(product, "Product not found for barcode: " + barcode);
         return product;
     }
-// todo check normalization  and validation -UPDATE
+
     public void updateByBarcode(String barcode, String newName, Double newMrp, String newImageUrl) throws ApiException {
         ProductPojo product = getByBarcode(barcode);
         product.setName(newName);
         product.setMrp(newMrp);
         product.setImageUrl(newImageUrl);
-        productDao.update(product);
     }
 
-    public List<ProductPojo> searchProducts(String searchTerm, int page, int size) throws ApiException {
-        return productDao.searchProducts(searchTerm, page, size);
-    }
-
-    public long getTotalSearchResults(String searchTerm) throws ApiException {
-        return productDao.getTotalSearchResults(searchTerm);
-    }
 }
 

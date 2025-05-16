@@ -17,7 +17,8 @@ public class ClientApi {
 
     public void insertClient(ClientPojo clientPojo) throws ApiException {
         ClientPojo existing = clientDao.select("clientName", clientPojo.getClientName());
-        ValidationUtil.checkNonNull(existing, "Client with name '" + clientPojo.getClientName() + "' already exists.");
+        ValidationUtil.checkNonNull(existing, "Client with name '" + clientPojo.getClientName()
+                + "' already exists.");
         clientDao.insert(clientPojo);
     }
 

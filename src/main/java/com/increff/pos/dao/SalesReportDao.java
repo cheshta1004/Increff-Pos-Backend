@@ -40,10 +40,8 @@ public class SalesReportDao {
         predicates.add(join2);
         predicates.add(join3);
 
-        // Add filter to only include completed orders
         predicates.add(cb.equal(order.get("status"), OrderStatus.COMPLETED));
 
-        // Use direct date comparison instead of DATE_FORMAT
         predicates.add(cb.greaterThanOrEqualTo(order.get("time"), form.getStartDate()));
         predicates.add(cb.lessThanOrEqualTo(order.get("time"), form.getEndDate()));
 

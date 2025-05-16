@@ -1,4 +1,5 @@
 package com.increff.pos.dto;
+
 import com.increff.pos.api.ClientApi;
 import com.increff.pos.dto.helper.DtoHelper;
 import com.increff.pos.exception.ApiException;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Component
 public class ClientDto {
@@ -53,7 +53,5 @@ public class ClientDto {
         NormalizeUtil.normalize(form);
         clientApi.updateClient(name.trim().toLowerCase(), form.getClientName());
     }
-
 }
-//todo line breaks
 

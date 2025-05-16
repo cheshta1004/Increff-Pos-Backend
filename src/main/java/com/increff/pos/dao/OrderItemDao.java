@@ -13,6 +13,7 @@ public class OrderItemDao extends AbstractDao<OrderItemPojo> {
     public OrderItemDao(){
         super(OrderItemPojo.class);
     }
+
     public List<OrderItemPojo> selectByOrderId(Integer orderId) {
         CriteriaBuilder criteriaBuilder = em().getCriteriaBuilder();
         CriteriaQuery<OrderItemPojo> criteriaQuery = criteriaBuilder.createQuery(OrderItemPojo.class);

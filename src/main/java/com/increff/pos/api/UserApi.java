@@ -34,4 +34,5 @@ public class UserApi {
     public UserPojo getByEmail(String email) {
         return userDao.getByEmail(email);
     }
+
 }

@@ -84,16 +84,12 @@ public class OrderDto {
     }
 
     public void updateStatus(Integer orderId, String statusStr) throws ApiException {
-        if (Objects.isNull(statusStr) || statusStr.trim().isEmpty()) {
-            throw new ApiException("Order status must not be empty");
-        }
         OrderStatus status = parseOrderStatus(statusStr);
         if (status.equals(OrderStatus.CANCELLED)) {
             cancelOrderItems(orderId);
         }
         orderApi.updateStatus(orderId, status);
     }
-
 
     public OrderData getOrderById(Integer orderId) throws ApiException {
         OrderPojo pojo = orderApi.getOrderById(orderId);
@@ -108,12 +104,11 @@ public class OrderDto {
 
     private void placeOrderItem(OrderItemForm itemForm, Integer orderId, BulkOrderItemData result) throws ApiException {
         try {
-            String barcode = itemForm.getBarcode().trim().toLowerCase();
+            String barcode = itemForm.getBarcode();
             ProductPojo product = orderFlow.getProductByBarcode(barcode);
             orderFlow.reduceInventory(product.getId(), itemForm.getQuantity());
             OrderItemPojo itemPojo = DtoHelper.convertOrderItemFormToPojo(itemForm, orderId, product.getId());
             orderApi.insertOrder(itemPojo);
-
             result.addSuccess(itemForm, "Order item placed successfully.");
         } catch (ApiException e) {
             result.addFailure(itemForm, e.getMessage());
@@ -131,7 +126,7 @@ public class OrderDto {
     private void checkInventory(List<OrderItemForm> orderItems, BulkOrderItemData result) throws ApiException {
         for (OrderItemForm itemForm : orderItems) {
             try {
-                ProductPojo product = orderFlow.getProductByBarcode(itemForm.getBarcode().trim().toLowerCase());
+                ProductPojo product = orderFlow.getProductByBarcode(itemForm.getBarcode());
                 InventoryPojo inventory = orderFlow.getInventoryByProductId(product.getId());
                 if (inventory.getQuantity() < itemForm.getQuantity()) {
                     throw new ApiException("Insufficient inventory for product: " + product.getName());
@@ -142,10 +137,12 @@ public class OrderDto {
         }
     }
     private OrderStatus parseOrderStatus(String statusStr) throws ApiException {
+        String status = statusStr.trim().toUpperCase();
         try {
-            return OrderStatus.valueOf(statusStr.trim().toUpperCase());
+            OrderStatus result = OrderStatus.valueOf(status);
+            return result;
         } catch (IllegalArgumentException e) {
-            throw new ApiException("Invalid order status: " + statusStr + ". Valid statuses are: CREATED, COMPLETED, CANCELLED.");
+            throw new ApiException("Invalid order status: " + status + ". Valid statuses are: CREATED, COMPLETED, CANCELLED.");
         }
     }
     

@@ -136,15 +136,5 @@ public class ProductApiTest {
         assertEquals(2L, productApi.getTotalCountByClientName("testclient").longValue());
     }
 
-    @Test
-    public void testGetTotalSearchResults() throws ApiException {
-        ProductForm form1 = createProductForm("123456", "Red Shoes", 99.99);
-        ProductForm form2 = createProductForm("789012", "Blue Shoes", 88.88);
-        ProductForm form3 = createProductForm("345678", "Green Shoes", 77.77);
-        productDto.insertProduct(form1);
-        productDto.insertProduct(form2);
-        productDto.insertProduct(form3);
 
-        assertEquals(3, productApi.getTotalSearchResults("shoes"));
-    }
 }

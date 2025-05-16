@@ -15,7 +15,7 @@ import java.util.Collections;
 import com.increff.pos.model.form.SalesReportFilterForm;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-
+import com.increff.pos.exception.ApiException;
 public class DailyReportTest {
 
     @InjectMocks
@@ -41,7 +41,7 @@ public class DailyReportTest {
     }
 
     @Test
-    public void testGetAllDailyReports() {
+    public void testGetAllDailyReports() throws ApiException {
         List<DailyReportPojo> expectedData = Collections.singletonList(createDailyReportPojo());
         when(dailyReportApi.getAllDailyReports()).thenReturn(expectedData);
 

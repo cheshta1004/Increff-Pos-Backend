@@ -73,7 +73,8 @@ public class ProductDto {
         return DtoHelper.convertProductPojoToData(pojo, client);
     }
 
-    public PaginatedResponse<ProductData> getProductsByClientName(String clientName, int page, int size) throws ApiException {
+    public PaginatedResponse<ProductData> getProductsByClientName(String clientName, int page, int size)
+            throws ApiException {
         List<ProductPojo> pojoList = productApi.getByClientName(clientName, page, size);
         List<ProductData> dataList = new ArrayList<>();
         for (ProductPojo p : pojoList) {
@@ -90,7 +91,8 @@ public class ProductDto {
         productApi.updateByBarcode(barcode.trim().toLowerCase(), form.getName(), form.getMrp(), form.getImageUrl());
     }
 
-    public PaginatedResponse<ProductData> getProductsByPartialBarcode(String barcode, int page, int size) throws ApiException {
+    public PaginatedResponse<ProductData> getProductsByPartialBarcode(String barcode, int page, int size)
+            throws ApiException {
         List<ProductPojo> pojoList = productApi.getByPartialBarcode(barcode, page, size);
         List<ProductData> dataList = new ArrayList<>();
         for (ProductPojo p : pojoList) {
@@ -101,7 +103,8 @@ public class ProductDto {
         return PaginationUtil.createPaginatedResponse(dataList, page, totalItems, size);
     }
 
-    public PaginatedResponse<ProductData> searchProducts(String clientName, String barcode, int page, int size) throws ApiException {
+    public PaginatedResponse<ProductData> searchProducts(String clientName, String barcode, int page, int size)
+            throws ApiException {
         if (!Objects.isNull(clientName)) {
             return getProductsByClientName(clientName.trim().toLowerCase(), page, size);
         } else if (!Objects.isNull(barcode)) {

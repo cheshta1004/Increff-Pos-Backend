@@ -17,7 +17,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "orders", uniqueConstraints = @UniqueConstraint(columnNames = "time"))
+@Table(name = "orders")
 public class OrderPojo extends AbstractVersionedPojo {
 
     @Id
