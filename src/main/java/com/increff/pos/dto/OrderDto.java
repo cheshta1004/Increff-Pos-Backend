@@ -30,7 +30,7 @@ import com.increff.pos.pojo.InventoryPojo;
 @Component
 @Transactional
 public class OrderDto {
-
+//todo -no need of time conversion for sorting
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     @Autowired
     private OrderApi orderApi;
@@ -68,7 +68,7 @@ public class OrderDto {
             throw new ApiException("Error getting orders: " + e.getMessage());
         }
     }
-
+//todo exception
     public List<OrderItemData> getOrderItems(Integer orderId) {
         return orderApi.getOrderItems(orderId)
                 .stream()
@@ -90,18 +90,18 @@ public class OrderDto {
         }
         orderApi.updateStatus(orderId, status);
     }
-
+//todo - null checks 
     public OrderData getOrderById(Integer orderId) throws ApiException {
         OrderPojo pojo = orderApi.getOrderById(orderId);
         List<OrderItemPojo> itemPojoList = orderApi.getOrderItems(pojo.getId());
         ProductPojo product = itemPojoList.isEmpty() ? null : orderFlow.getProductById(itemPojoList.get(0).getProductId());
         return DtoHelper.convertOrderPojoToData(pojo, itemPojoList, product);
     }
-
+// todo merger with create and inseert
     private OrderPojo createNewOrder(BulkOrderItemForm form) throws ApiException {
         return DtoHelper.convertBulkOrderFormToPojo(form);
     }
-
+//todo keep products in memory
     private void placeOrderItem(OrderItemForm itemForm, Integer orderId, BulkOrderItemData result) throws ApiException {
         try {
             String barcode = itemForm.getBarcode();
@@ -145,7 +145,7 @@ public class OrderDto {
             throw new ApiException("Invalid order status: " + status + ". Valid statuses are: CREATED, COMPLETED, CANCELLED.");
         }
     }
-    
+    //todo - check if order is present
     private void cancelOrderItems(Integer orderId) throws ApiException {
         List<OrderItemPojo> orderItems = orderApi.getOrderItems(orderId);
         for (OrderItemPojo item : orderItems) {

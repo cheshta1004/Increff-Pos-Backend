@@ -23,7 +23,7 @@ public class DailyReportScheduler {
 
     @Autowired
     private DailyReportDto dailyReportDto;
-
+//todo - time format
     @Scheduled(fixedRate = 600000)
     public void generateDailyReport() {
         if (shouldSkipExecution()) {

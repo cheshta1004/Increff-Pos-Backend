@@ -25,7 +25,7 @@ public class OrderApi {
     public void insertOrder(OrderPojo pojo) {
         orderDao.insert(pojo);
     }
-
+//todo insert order item
     public void insertOrder(OrderItemPojo pojo) {
         orderItemDao.insert(pojo);
     }
@@ -35,7 +35,7 @@ public class OrderApi {
         ValidationUtil.checkNull(orderPojo, "Order not found");
         orderPojo.setStatus(status);
     }
-
+// todo - sort in dao
     public List<OrderPojo> getAllOrders() {
         return orderDao.selectAll();
     }

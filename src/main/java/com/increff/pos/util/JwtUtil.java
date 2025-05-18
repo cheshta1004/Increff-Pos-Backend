@@ -10,7 +10,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
+// todo depricated method
     public String generateToken(String email, Role role) {
         return Jwts.builder()
                 .setSubject(email)

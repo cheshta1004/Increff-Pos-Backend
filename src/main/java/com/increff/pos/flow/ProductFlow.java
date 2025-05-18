@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductFlow {
     @Autowired
     private ClientApi clientApi;
-
+//todo naming
     public ClientPojo getClientByNameOrThrow(String clientName) throws ApiException {
         return clientApi.getClientsByPartialName(clientName, 0, 1).get(0);
     }

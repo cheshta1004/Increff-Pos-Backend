@@ -21,7 +21,7 @@ import java.util.Objects;
 public class SalesReportDao {
     @PersistenceContext
     private EntityManager entityManager;
- 
+ //todo -predicates,modular
     public List<SalesReportData> getFilteredSalesReport(SalesReportFilterForm form) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<SalesReportData> query = cb.createQuery(SalesReportData.class);

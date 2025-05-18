@@ -27,8 +27,7 @@ public class DailyReportDao extends AbstractDao<DailyReportPojo> {
     public DailyReportPojo calculateDailyReport(ZonedDateTime date) {
         // Convert to UTC timezone for start/end of day
         ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(UTC_ZONE);
-        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
-        
+       
         // Get all orders for the day
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<OrderPojo> cq = cb.createQuery(OrderPojo.class);
@@ -42,7 +41,7 @@ public class DailyReportDao extends AbstractDao<DailyReportPojo> {
         ));
         
         List<OrderPojo> orders = em.createQuery(cq).getResultList();
-        
+        //todo in api
         // Calculate totals
         long totalOrders = orders.size();
         long totalItems = 0;
@@ -126,6 +125,7 @@ public class DailyReportDao extends AbstractDao<DailyReportPojo> {
         return em.createQuery(cq).getResultList();
     }
 
+    //todo -update only
     public void recalculateDailyReport(ZonedDateTime date) {
         ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(UTC_ZONE);
         DailyReportPojo existingReport = selectByDate(date);

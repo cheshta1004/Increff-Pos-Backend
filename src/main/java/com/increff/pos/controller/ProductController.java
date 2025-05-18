@@ -17,7 +17,7 @@ public class ProductController {
 
     @Autowired
     private ProductDto productDto;
-
+//todo not try catch
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     public ResponseEntity<?> insertProduct(@RequestBody ProductForm productForms) {
         try {

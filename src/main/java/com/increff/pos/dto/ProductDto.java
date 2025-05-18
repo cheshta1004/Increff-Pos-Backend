@@ -55,7 +55,7 @@ public class ProductDto {
         result.setFailureList(failureList);
         return result;
     }
-
+//todo , count and get in same call
     public PaginatedResponse<ProductData> getAllProducts(int page, int size) throws ApiException {
         List<ProductPojo> pojoList = productApi.getAll(page, size);
         List<ProductData> dataList = new ArrayList<>();
@@ -106,6 +106,7 @@ public class ProductDto {
     public PaginatedResponse<ProductData> searchProducts(String clientName, String barcode, int page, int size)
             throws ApiException {
         if (!Objects.isNull(clientName)) {
+            //todo private methods
             return getProductsByClientName(clientName.trim().toLowerCase(), page, size);
         } else if (!Objects.isNull(barcode)) {
             return getProductsByPartialBarcode(barcode.trim().toLowerCase(), page, size);

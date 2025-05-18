@@ -5,49 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e2c4059-27ee-44fc-950e-f23257f3cbb3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/ClientApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/ClientApi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/InventoryApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/InventoryApi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/OrderApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/OrderApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/ProductApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/ProductApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/SalesReportApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/SalesReportApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/UserApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/api/UserApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/config/ControllerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/config/ControllerConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/config/WebInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/config/WebInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/DailyReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/DailyReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/InventoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/InventoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/ProductController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/SalesReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/SalesReportController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/controller/UserController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/ClientDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/ClientDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/OrderDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/OrderDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/OrderItemDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/OrderItemDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/ProductDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/ProductDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/DailyReportDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/DailyReportDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/SalesReportDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dao/SalesReportDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/ClientDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/ClientDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/DailyReportDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/DailyReportDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/InventoryDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/InventoryDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/OrderDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/OrderDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/ProductDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/ProductDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/SalesReportDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/SalesReportDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/UserDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/UserDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/helper/DtoHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/dto/helper/DtoHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/exception/ApiException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/exception/ApiException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/model/data/DailyReportData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/model/data/DailyReportData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/pojo/AbstractVersionedPojo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/pojo/AbstractVersionedPojo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/pojo/OrderPojo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/pojo/OrderPojo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/flow/ProductFlow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/flow/ProductFlow.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/model/data/PaginatedResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/model/data/PaginatedResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/report/SalesReport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/report/SalesReport.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/scheduler/DailyReportScheduler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/scheduler/DailyReportScheduler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/JwtUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/JwtUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/PaginationUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/PaginationUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/ValidationUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/ValidationUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/increff/pos/api/OrderApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/increff/pos/api/OrderApiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/increff/pos/api/ProductApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/increff/pos/api/ProductApiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/increff/pos/dao/OrderDaoTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/increff/pos/dao/OrderDaoTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/increff/pos/dto/DailyReportTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/increff/pos/dto/DailyReportTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/NormalizeUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/increff/pos/util/NormalizeUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,23 +39,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JUnit.java in pos.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.pos in pos.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.pos [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.pos [install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.pos [jetty:run].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/cheshtakharbanda/IdeaProjects/POS_Application/backend&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.java in pos.executor": "Run",
+    "JUnit.pos in pos.executor": "Run",
+    "Maven.pos [clean].executor": "Run",
+    "Maven.pos [install].executor": "Run",
+    "Maven.pos [jetty:run].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/cheshtakharbanda/IdeaProjects/POS_Application/backend",
+    "project.structure.last.edited": "Artifacts",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.increff.pos.config" />

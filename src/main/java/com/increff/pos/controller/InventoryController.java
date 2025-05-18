@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
-
+// todo path 
     @Autowired
     private InventoryDto inventoryDto;
     @RequestMapping(path = "/add", method = RequestMethod.POST)

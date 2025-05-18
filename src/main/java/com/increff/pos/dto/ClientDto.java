@@ -26,7 +26,7 @@ public class ClientDto {
         ClientPojo pojo = DtoHelper.convertFormToClientPojo(form);
         clientApi.insertClient(pojo);
     }
-
+//todo- use common funtion for getting count
     public PaginatedResponse<ClientData> getAllClient(int page, int size) throws ApiException {
         List<ClientPojo> pojoList = clientApi.getAllClient(page, size);
         List<ClientData> dataList = new ArrayList<>();

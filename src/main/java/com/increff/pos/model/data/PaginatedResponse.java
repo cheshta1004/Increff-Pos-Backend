@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+//todo constructor
 public class PaginatedResponse<T> {
     private List<T> content;
     private int currentPage;

@@ -15,7 +15,7 @@ public class SalesReportController {
 
     @Autowired
     private SalesReportDto salesReportDto;
-
+//todo naming
     @RequestMapping(path = "/filtered-sales-report", method = RequestMethod.POST)
     public List<SalesReportData> getFilteredSalesReport( @RequestBody SalesReportFilterForm form) throws ApiException{
         return salesReportDto.getFilteredSalesReport(form);

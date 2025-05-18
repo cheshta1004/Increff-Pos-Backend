@@ -32,7 +32,7 @@ public class InventoryApi {
     public InventoryPojo getByProductId(Integer productId) throws ApiException {
         return inventoryDao.select("productId", productId);
     }
-
+//todo - 2 calls for product
     public void updateInventory(Integer productId, Integer newQuantity) throws ApiException {
         InventoryPojo inventory = inventoryDao.select("productId",productId);
         ValidationUtil.checkNull(inventory, "Inventory not found for productId: " + productId);
@@ -41,7 +41,7 @@ public class InventoryApi {
         }
         inventory.setQuantity(newQuantity);
     }
-
+// only update
     public void reduceInventory(Integer productId, Integer quantityToReduce) throws ApiException{
         InventoryPojo existing = inventoryDao.select("productId",productId);
         ValidationUtil.checkNull(existing, "Inventory not found for productId: " + productId);

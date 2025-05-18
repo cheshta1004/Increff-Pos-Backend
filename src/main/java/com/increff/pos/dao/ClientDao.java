@@ -33,6 +33,8 @@ public class ClientDao extends AbstractDao<ClientPojo> {
         Predicate namePredicate = cb.like(cb.lower(root.get("clientName")),"%" + partialName.toLowerCase()+ "%");
         cq.where(namePredicate);
         TypedQuery<ClientPojo> query = em().createQuery(cq);
+
+        //todo-use case of setFirstResult and setMaxResults
         query.setFirstResult(page * size);
         query.setMaxResults(size);
         return query.getResultList();

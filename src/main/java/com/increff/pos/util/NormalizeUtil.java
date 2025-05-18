@@ -4,7 +4,7 @@ import com.increff.pos.model.form.*;
 import java.util.Objects;
 
 public class NormalizeUtil {
-
+// todo - make genric .trim()
     public static void normalize(ClientForm form) {
         if (!Objects.isNull(form.getClientName())) {
             form.setClientName(form.getClientName().trim().toLowerCase());
